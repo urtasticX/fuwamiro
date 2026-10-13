@@ -3052,6 +3052,46 @@ label select:focus {
   display: block;
   margin-top: 3px;
 }
+.admin-memory-filter {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--muted);
+  font-size: 10px;
+}
+.admin-memory-filter select {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: white;
+  color: var(--ink);
+  font-size: 12px;
+}
+.admin-memory-group {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.admin-memory-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 3px 0 6px;
+}
+.admin-memory-heading img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.admin-memory-heading > span { flex: 1; min-width: 0; }
+.admin-memory-heading strong { display: block; font-size: 12px; }
+.admin-memory-heading small { display: block; color: var(--muted); font-size: 9px; }
+.admin-memory-heading .icon-button { width: 28px; height: 28px; }
+.admin-memory-record { margin-top: 2px; padding: 8px 10px 8px 45px; }
+.admin-memory-record strong { font-size: 11px; line-height: 1.4; }
+.admin-memory-empty { margin: 8px 0; color: var(--muted); font-size: 11px; }
 .admin-editor {
   padding: 30px;
   border: 1px solid var(--line);

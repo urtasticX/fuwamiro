@@ -263,6 +263,7 @@ export function Admin() {
   const [health, setHealth] = useState<PrivateHealth | null>(null);
   const [content, setContent] = useState(defaultContent);
   const [search, setSearch] = useState("");
+  const [timelineCat, setTimelineCat] = useState("all");
   // JSON snapshot of each editor when it was opened or last saved, to detect unsaved edits.
   const baseline = useRef<Partial<Record<Kind, string>>>({});
   const editing: Record<Kind, unknown> = {
@@ -286,6 +287,16 @@ export function Admin() {
   const currentDirty = currentKind ? isDirty(currentKind) : false;
   const matches = (...text: (string | undefined)[]) =>
     text.some((t) => t?.toLowerCase().includes(search.trim().toLowerCase()));
+  const sortedCats = [...data.cats].sort((a, b) => a.name.localeCompare(b.name, "th"));
+  const timelineGroups = sortedCats
+    .filter((c) => timelineCat === "all" || timelineCat === c.id)
+    .map((c) => ({
+      cat: c,
+      events: data.events
+        .filter((ev) => ev.cat_id === c.id && matches(c.name, c.nickname, ev.title.th, ev.title.en))
+        .sort((a, b) => b.date.localeCompare(a.date)),
+    }))
+    .filter((group) => group.events.length > 0 || (timelineCat !== "all" && !search.trim()));
   function confirmDiscard(kinds: Kind[]) {
     return (
       !kinds.some(isDirty) ||
@@ -311,6 +322,17 @@ export function Admin() {
   function revert(kind: Kind) {
     const saved = baseline.current[kind];
     if (saved) setters[kind](JSON.parse(saved));
+  }
+  function addEvent(catId: string) {
+    open("event", {
+      id: crypto.randomUUID(),
+      cat_id: catId,
+      date: new Date().toISOString().slice(0, 10),
+      title: copy(),
+      description: copy(),
+      photos: [],
+      video_url: null,
+    });
   }
   useEffect(() => {
     if (!anyDirty) return;
@@ -1176,47 +1198,47 @@ export function Admin() {
                   <h3>ความทรงจำ</h3>
                   <button
                     className="icon-button"
-                    aria-label="Add timeline event"
-                    onClick={() =>
-                      open("event", {
-                        id: crypto.randomUUID(),
-                        cat_id: data.cats[0]?.id || "",
-                        date: new Date().toISOString().slice(0, 10),
-                        title: copy(),
-                        description: copy(),
-                        photos: [],
-                        video_url: null,
-                      })
-                    }
+                    aria-label="เพิ่มความทรงจำ"
+                    onClick={() => addEvent(timelineCat === "all" ? sortedCats[0]?.id || "" : timelineCat)}
                   >
                     <Plus />
                   </button>
                 </div>
+                <label className="admin-memory-filter">
+                  แสดงความทรงจำของ
+                  <select value={timelineCat} onChange={(e) => setTimelineCat(e.target.value)}>
+                    <option value="all">สมาชิกทุกตัว ({data.events.length})</option>
+                    {sortedCats.map((c) => (
+                      <option value={c.id} key={c.id}>
+                        {c.name} ({data.events.filter((ev) => ev.cat_id === c.id).length})
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 {searchBox("ค้นหาเรื่องราวหรือชื่อแมว…")}
-                {[...data.events]
-                  .filter((ev) =>
-                    matches(
-                      ev.title.th,
-                      ev.title.en,
-                      data.cats.find((c) => c.id === ev.cat_id)?.name,
-                    ),
-                  )
-                  .sort((a, b) => b.date.localeCompare(a.date))
-                  .map((ev) => (
-                    <button
-                      key={ev.id}
-                      className={`admin-record ${event?.id === ev.id ? "selected" : ""}`}
-                      onClick={() => open("event", structuredClone(ev))}
-                    >
-                      <span>
-                        <strong>{ev.title.th || ev.title.en}</strong>
-                        <small>
-                          {data.cats.find((c) => c.id === ev.cat_id)?.name} ·{" "}
-                          {ev.date}
-                        </small>
-                      </span>
-                    </button>
-                  ))}
+                {timelineGroups.length === 0 && <p className="admin-memory-empty">ไม่พบความทรงจำในรายการนี้</p>}
+                {timelineGroups.map(({ cat: memoryCat, events: memories }) => (
+                  <div className="admin-memory-group" key={memoryCat.id}>
+                    <div className="admin-memory-heading">
+                      <img src={memoryCat.portrait} alt="" />
+                      <span><strong>{memoryCat.name}</strong><small>{memories.length} ความทรงจำ</small></span>
+                      <button type="button" className="icon-button" aria-label={`เพิ่มความทรงจำให้ ${memoryCat.name}`} onClick={() => addEvent(memoryCat.id)}><Plus size={16} /></button>
+                    </div>
+                    {memories.length === 0 && <p className="admin-memory-empty">ยังไม่มีความทรงจำของน้อง</p>}
+                    {memories.map((ev) => (
+                      <button
+                        key={ev.id}
+                        className={`admin-record admin-memory-record ${event?.id === ev.id ? "selected" : ""}`}
+                        onClick={() => open("event", structuredClone(ev))}
+                      >
+                        <span>
+                          <strong>{ev.title.th || ev.title.en}</strong>
+                          <small>{ev.date}</small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                ))}
               </aside>
               {event ? (
                 <form
