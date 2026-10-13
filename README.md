@@ -20,4 +20,6 @@ See [Firebase setup](FIREBASE_SETUP.md) for database collections, access rules, 
 
 ## Current state
 
-The public page components and Firebase integration are in place. Full styling, image assets, the admin dashboard, and production deployment are still in progress. Sample data is used when Firestore cannot be read. No sample data has been uploaded automatically.
+The responsive public site includes cat and kitten profiles, an animated journey timeline, a linked family tree, filters, photo galleries, alumni stories, and Thai/English copy. The authenticated admin area can manage cats, litters, events, public content, photos, and private health records. Generated sample cats and photos are illustrative. No sample data is uploaded automatically.
+
+The website shows sample content while Firestore access is unavailable or the content collections are empty. See [Firebase setup](FIREBASE_SETUP.md) for the steps needed before real content can be edited in the admin area.

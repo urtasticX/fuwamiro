@@ -1,0 +1,1366 @@
+"use client";
+import { useEffect, useState, FormEvent, ReactNode } from "react";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  User,
+} from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { getBlob, ref } from "firebase/storage";
+import {
+  ArrowUpRight,
+  LockKeyhole,
+  LogOut,
+  Plus,
+  Upload,
+  Trash2,
+  Save,
+  Heart,
+  RefreshCw,
+  Check,
+  ImagePlus,
+} from "lucide-react";
+import { db, getFirebaseAuth, storage } from "@/lib/firebase";
+import {
+  loadAdminData,
+  saveRecord,
+  removeRecord,
+  uploadMedia,
+  saveContent,
+  validateCat,
+  importSampleData,
+  PrivateHealth,
+} from "@/lib/admin";
+import { Cat, Copy, JourneyEvent, Litter, SiteContent } from "@/lib/types";
+import { defaultContent } from "@/lib/data";
+import { useSite } from "./providers";
+import { Eyebrow } from "./ui";
+type Data = Awaited<ReturnType<typeof loadAdminData>>;
+type Tab = "overview" | "cats" | "litters" | "timeline" | "health" | "content";
+const tabs: [Tab, string][] = [
+  ["overview", "ภาพรวม"],
+  ["cats", "สมาชิกในบ้าน"],
+  ["litters", "ครอกลูกแมว"],
+  ["timeline", "ไทม์ไลน์ & Alumni"],
+  ["health", "เวชระเบียนส่วนตัว"],
+  ["content", "เนื้อหา & ติดต่อ"],
+];
+const copy = (): Copy => ({ th: "", en: "" });
+function newCat(): Cat {
+  return {
+    id: crypto.randomUUID(),
+    name: "",
+    breed: "British Shorthair",
+    gender: "Male",
+    color: "",
+    color_code: "",
+    birthday: "",
+    stage: "kitten",
+    availability: "Under Evaluation",
+    portrait: "",
+    photos: [],
+    personality: copy(),
+    story: copy(),
+    public_health: copy(),
+    pedigree: "",
+    father_id: null,
+    mother_id: null,
+    litter_id: null,
+    ready_date: null,
+    adoption_date: null,
+    price: null,
+  };
+}
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="form-field">
+      {label}
+      {children}
+    </label>
+  );
+}
+function CopyFields({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: Copy;
+  onChange: (v: Copy) => void;
+}) {
+  return (
+    <fieldset className="copy-fields">
+      <legend>{label}</legend>
+      <Field label="ไทย">
+        <textarea
+          rows={3}
+          value={value.th}
+          onChange={(e) => onChange({ ...value, th: e.target.value })}
+        />
+      </Field>
+      <Field label="English">
+        <textarea
+          rows={3}
+          value={value.en}
+          onChange={(e) => onChange({ ...value, en: e.target.value })}
+        />
+      </Field>
+    </fieldset>
+  );
+}
+function MediaEditor({
+  value,
+  onChange,
+  onError,
+}: {
+  value: string[];
+  onChange: (v: string[]) => void;
+  onError: (s: string) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="media-editor">
+      <div className="admin-media-grid">
+        {value.map((url, i) => (
+          <div key={`${url}-${i}`}>
+            {/\.(mp4|webm)(\?|$)/i.test(url) ? (
+              <span>Video</span>
+            ) : (
+              <img src={url} alt={`Photo ${i + 1}`} />
+            )}
+            <button
+              type="button"
+              aria-label={`Remove photo ${i + 1}`}
+              onClick={() => onChange(value.filter((_, n) => n !== i))}
+            >
+              ×
+            </button>
+          </div>
+        ))}
+      </div>
+      <label className="button outline small upload-label">
+        <ImagePlus size={15} />
+        {busy ? "กำลังอัปโหลด…" : "เพิ่มรูปภาพ"}
+        <input
+          type="file"
+          hidden
+          accept="image/jpeg,image/png,image/webp,image/avif"
+          multiple
+          disabled={busy}
+          onChange={async (e) => {
+            if (!e.target.files) return;
+            setBusy(true);
+            try {
+              onChange([...value, ...(await uploadMedia(e.target.files))]);
+            } catch (error) {
+              onError(message(error));
+            } finally {
+              setBusy(false);
+              e.target.value = "";
+            }
+          }}
+        />
+      </label>
+    </div>
+  );
+}
+function message(error: unknown) {
+  const e = error as { code?: string; message?: string };
+  const messages: Record<string, string> = {
+    "auth/invalid-credential": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+    "auth/operation-not-allowed":
+      "กรุณาเปิด Email/Password ใน Firebase Authentication ก่อน",
+    "auth/configuration-not-found":
+      "โปรเจกต์ยังไม่ได้เปิด Firebase Authentication",
+    "auth/too-many-requests": "ลองใหม่ในอีกสักครู่ เนื่องจากมีคำขอมากเกินไป",
+    "permission-denied":
+      "ยังไม่มีสิทธิ์เข้าถึงข้อมูล ตรวจสอบบัญชีแอดมินและ Firebase Rules",
+    "storage/unauthorized": "บัญชีนี้ยังไม่มีสิทธิ์อัปโหลดไฟล์",
+    "storage/unknown": "อัปโหลดไม่สำเร็จ ตรวจสอบว่าเปิด Firebase Storage แล้ว",
+  };
+  return messages[e.code || ""] || e.message || "เกิดข้อผิดพลาด กรุณาลองใหม่";
+}
+export function Admin() {
+  const { refresh } = useSite();
+  const [user, setUser] = useState<User | null>(null);
+  const [authorized, setAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [tab, setTab] = useState<Tab>("overview");
+  const [data, setData] = useState<Data>({
+    cats: [],
+    events: [],
+    litters: [],
+    health: [],
+    content: defaultContent,
+  });
+  const [loaded, setLoaded] = useState(false);
+  const [cat, setCat] = useState<Cat | null>(null);
+  const [litter, setLitter] = useState<Litter | null>(null);
+  const [event, setEvent] = useState<JourneyEvent | null>(null);
+  const [health, setHealth] = useState<PrivateHealth | null>(null);
+  const [content, setContent] = useState(defaultContent);
+  const [search, setSearch] = useState("");
+  async function reload() {
+    const next = await loadAdminData();
+    setData(next);
+    setContent(next.content);
+    setLoaded(true);
+    await refresh();
+  }
+  useEffect(
+    () =>
+      onAuthStateChanged(getFirebaseAuth(), async (next) => {
+        setChecking(true);
+        setUser(next);
+        setAuthorized(false);
+        setLoaded(false);
+        setCat(null);
+        setLitter(null);
+        setEvent(null);
+        setHealth(null);
+        setData({
+          cats: [],
+          events: [],
+          litters: [],
+          health: [],
+          content: defaultContent,
+        });
+        setContent(defaultContent);
+        if (next) {
+          try {
+            const token = await next.getIdTokenResult(true);
+            let admin = token.claims.admin === true;
+            if (!admin) {
+              const access = await getDoc(doc(db, "admins", next.uid));
+              admin = access.exists() && access.data().enabled === true;
+            }
+            setAuthorized(admin);
+            if (admin) await reload();
+            else
+              setError(
+                "บัญชีนี้ยังไม่ได้รับสิทธิ์แอดมิน กรุณาเพิ่มสิทธิ์ใน Firebase ก่อน",
+              );
+          } catch (e) {
+            setError(message(e));
+          }
+        }
+        setChecking(false);
+      }),
+    [],
+  );
+  async function action(fn: () => Promise<void>, success = "บันทึกเรียบร้อย") {
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await fn();
+      setNotice(success);
+    } catch (e) {
+      setError(message(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function save(e: FormEvent, fn: () => Promise<void>) {
+    e.preventDefault();
+    await action(async () => {
+      await fn();
+      await reload();
+    });
+  }
+  const alert = (
+    <>
+      {error && (
+        <div className="admin-alert error" role="alert">
+          {error}
+        </div>
+      )}
+      {notice && (
+        <div className="admin-alert" role="status">
+          <Check size={16} />
+          {notice}
+        </div>
+      )}
+    </>
+  );
+  if (checking)
+    return (
+      <section className="admin-login container">
+        <p role="status">กำลังตรวจสอบบัญชี…</p>
+      </section>
+    );
+  if (!user || !authorized)
+    return (
+      <section className="admin-login container">
+        <div className="admin-login-card">
+          <span className="admin-lock">
+            <LockKeyhole size={25} />
+          </span>
+          <Eyebrow>THE CARE BEHIND OUR LITTLE HOME</Eyebrow>
+          <h1>
+            Cattery <em>Admin.</em>
+          </h1>
+          <p>เข้าสู่ระบบด้วยบัญชีผู้ดูแล Fuwamiro</p>
+          {alert}
+          {user ? (
+            <>
+              <p className="admin-uid">UID: {user.uid}</p>
+              <button
+                className="button outline"
+                onClick={() => signOut(getFirebaseAuth())}
+              >
+                ออกจากระบบ
+              </button>
+            </>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void action(async () => {
+                  await signInWithEmailAndPassword(
+                    getFirebaseAuth(),
+                    email,
+                    password,
+                  );
+                }, "เข้าสู่ระบบแล้ว");
+              }}
+            >
+              <Field label="อีเมล">
+                <input
+                  type="email"
+                  required
+                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Field>
+              <Field label="รหัสผ่าน">
+                <input
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Field>
+              <button className="button" disabled={busy}>
+                {busy ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ"}
+                <ArrowUpRight size={17} />
+              </button>
+              <button
+                type="button"
+                className="admin-reset"
+                disabled={busy}
+                onClick={() => {
+                  if (!email) {
+                    setError("กรุณากรอกอีเมลก่อน");
+                    return;
+                  }
+                  void action(
+                    () => sendPasswordResetEmail(getFirebaseAuth(), email),
+                    "หากมีบัญชีนี้ในระบบ คุณจะได้รับอีเมลตั้งรหัสผ่านใหม่",
+                  );
+                }}
+              >
+                ลืมรหัสผ่าน?
+              </button>
+            </form>
+          )}
+          <p className="admin-login-note">
+            เฉพาะผู้ดูแลที่ได้รับสิทธิ์เท่านั้น
+          </p>
+        </div>
+      </section>
+    );
+  const catSelect = (
+    value: string | null | undefined,
+    onChange: (v: string) => void,
+    gender?: string,
+  ) => (
+    <select value={value || ""} onChange={(e) => onChange(e.target.value)}>
+      <option value="">— ไม่ระบุ —</option>
+      {data.cats
+        .filter((c) => (!gender || c.gender === gender) && c.id !== cat?.id)
+        .map((c) => (
+          <option value={c.id} key={c.id}>
+            {c.name}
+          </option>
+        ))}
+    </select>
+  );
+  const saveButton = (
+    <button className="button" disabled={busy || !loaded}>
+      <Save size={16} />
+      {busy ? "กำลังบันทึก…" : "บันทึกการเปลี่ยนแปลง"}
+    </button>
+  );
+  return (
+    <section className="container admin-page">
+      <div className="admin-heading">
+        <div>
+          <Eyebrow>FUWAMIRO · PRIVATE WORKSPACE</Eyebrow>
+          <h1>
+            Our little <em>home.</em>
+          </h1>
+          <p>{user.email}</p>
+        </div>
+        <div className="admin-heading-actions">
+          <button
+            className="button outline small"
+            disabled={busy}
+            onClick={() => action(reload, "อัปเดตข้อมูลแล้ว")}
+          >
+            <RefreshCw size={14} />
+            โหลดใหม่
+          </button>
+          <button
+            className="button outline small"
+            onClick={() => signOut(getFirebaseAuth())}
+          >
+            <LogOut size={14} />
+            ออกจากระบบ
+          </button>
+        </div>
+      </div>
+      <nav className="admin-tabs" aria-label="Admin sections">
+        {tabs.map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => {
+              setTab(id);
+              setError("");
+              setNotice("");
+            }}
+            className={tab === id ? "selected" : ""}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+      {alert}
+      {!loaded ? (
+        <div className="empty-state">
+          <h3>ยังโหลดข้อมูลไม่สำเร็จ</h3>
+          <p>ตรวจสอบ Firebase Rules และลองโหลดใหม่</p>
+        </div>
+      ) : (
+        <>
+          {tab === "overview" && (
+            <>
+              <div className="admin-stats">
+                {[
+                  ["สมาชิกทั้งหมด", data.cats.length],
+                  [
+                    "กำลังหาบ้าน",
+                    data.cats.filter(
+                      (c) =>
+                        c.stage === "kitten" && c.availability === "Available",
+                    ).length,
+                  ],
+                  [
+                    "Alumni",
+                    data.cats.filter((c) => c.stage === "alumni").length,
+                  ],
+                  ["ความทรงจำ", data.events.length],
+                ].map(([label, n]) => (
+                  <div key={label}>
+                    <span>{label}</span>
+                    <strong>{n}</strong>
+                  </div>
+                ))}
+              </div>
+              <div className="admin-welcome">
+                <Heart size={30} />
+                <h2>Every detail, with care.</h2>
+                <p>
+                  จัดการข้อมูลแมวด้วยรหัสเดิมตลอดทุกช่วงชีวิต
+                  เลือกเมนูด้านบนเพื่อเพิ่มสมาชิก ครอก หรือความทรงจำใหม่
+                </p>
+                <button
+                  className="button"
+                  onClick={() => {
+                    setTab("cats");
+                    setCat(newCat());
+                  }}
+                >
+                  <Plus size={16} />
+                  เพิ่มสมาชิก
+                </button>
+                {data.cats.length === 0 && (
+                  <button
+                    className="button outline"
+                    disabled={busy}
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "เพิ่มข้อมูลและภาพตัวอย่างสำหรับทดลองเว็บไซต์? ข้อมูลเหล่านี้เป็นตัวอย่าง ไม่ใช่แมวจริงของฟาร์ม",
+                        )
+                      )
+                        void action(async () => {
+                          await importSampleData();
+                          await reload();
+                        }, "เพิ่มข้อมูลตัวอย่างแล้ว");
+                    }}
+                  >
+                    เพิ่มข้อมูลตัวอย่าง
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+          {tab === "cats" && (
+            <div className="admin-split">
+              <aside className="admin-records">
+                <div className="admin-records-heading">
+                  <h3>สมาชิกในบ้าน</h3>
+                  <button
+                    className="icon-button"
+                    aria-label="Add cat"
+                    onClick={() => setCat(newCat())}
+                  >
+                    <Plus size={20} />
+                  </button>
+                </div>
+                <input
+                  aria-label="Search admin cats"
+                  placeholder="ค้นหาชื่อแมว…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {data.cats
+                  .filter((c) =>
+                    c.name.toLowerCase().includes(search.toLowerCase()),
+                  )
+                  .map((c) => (
+                    <button
+                      key={c.id}
+                      className={`admin-record ${cat?.id === c.id ? "selected" : ""}`}
+                      onClick={() => setCat(structuredClone(c))}
+                    >
+                      <img src={c.portrait} alt="" />
+                      <span>
+                        <strong>{c.name}</strong>
+                        <small>
+                          {c.stage} · {c.availability}
+                        </small>
+                      </span>
+                    </button>
+                  ))}
+              </aside>
+              {cat ? (
+                <form
+                  className="admin-editor"
+                  onSubmit={(e) =>
+                    save(e, async () => {
+                      validateCat(cat, data.cats, data.litters);
+                      await saveRecord("cats", cat);
+                    })
+                  }
+                >
+                  <div className="admin-editor-heading">
+                    <h2>{cat.name || "สมาชิกใหม่"}</h2>
+                    <span className="record-id">ID: {cat.id}</span>
+                  </div>
+                  <div className="form-grid">
+                    <Field label="ชื่อ">
+                      <input
+                        required
+                        value={cat.name}
+                        onChange={(e) =>
+                          setCat({ ...cat, name: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="ชื่อใหม่ (เมื่อย้ายบ้าน)">
+                      <input
+                        value={cat.nickname || ""}
+                        onChange={(e) =>
+                          setCat({ ...cat, nickname: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="สายพันธุ์">
+                      <input
+                        required
+                        value={cat.breed}
+                        onChange={(e) =>
+                          setCat({ ...cat, breed: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="เพศ">
+                      <select
+                        value={cat.gender}
+                        onChange={(e) =>
+                          setCat({
+                            ...cat,
+                            gender: e.target.value as Cat["gender"],
+                          })
+                        }
+                      >
+                        <option>Male</option>
+                        <option>Female</option>
+                      </select>
+                    </Field>
+                    <Field label="สีขน">
+                      <input
+                        required
+                        value={cat.color}
+                        onChange={(e) =>
+                          setCat({ ...cat, color: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="รหัสสี">
+                      <input
+                        value={cat.color_code}
+                        onChange={(e) =>
+                          setCat({ ...cat, color_code: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="วันเกิด">
+                      <input
+                        type="date"
+                        required
+                        value={cat.birthday}
+                        onChange={(e) =>
+                          setCat({ ...cat, birthday: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="ช่วงชีวิต">
+                      <select
+                        value={cat.stage}
+                        onChange={(e) =>
+                          setCat({
+                            ...cat,
+                            stage: e.target.value as Cat["stage"],
+                          })
+                        }
+                      >
+                        <option value="kitten">Kitten</option>
+                        <option value="breeding">Breeding Cat</option>
+                        <option value="retired">Retired</option>
+                        <option value="alumni">Alumni</option>
+                      </select>
+                    </Field>
+                    <Field label="สถานะ">
+                      <select
+                        value={cat.availability}
+                        onChange={(e) =>
+                          setCat({
+                            ...cat,
+                            availability: e.target.value as Cat["availability"],
+                          })
+                        }
+                      >
+                        {[
+                          "Available",
+                          "Reserved",
+                          "Under Evaluation",
+                          "Sold",
+                          "Staying",
+                        ].map((s) => (
+                          <option key={s}>{s}</option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="ครอก">
+                      <select
+                        value={cat.litter_id || ""}
+                        onChange={(e) => {
+                          const l = data.litters.find(
+                            (l) => l.id === e.target.value,
+                          );
+                          setCat({
+                            ...cat,
+                            litter_id: l?.id || null,
+                            ...(l
+                              ? {
+                                  father_id: l.father_id,
+                                  mother_id: l.mother_id,
+                                  birthday: l.birthday,
+                                }
+                              : {}),
+                          });
+                        }}
+                      >
+                        <option value="">— ไม่ระบุ —</option>
+                        {data.litters.map((l) => (
+                          <option key={l.id} value={l.id}>
+                            {l.name}
+                          </option>
+                        ))}
+                      </select>
+                    </Field>
+                    <Field label="พ่อ">
+                      {catSelect(
+                        cat.father_id,
+                        (v) => setCat({ ...cat, father_id: v || null }),
+                        "Male",
+                      )}
+                    </Field>
+                    <Field label="แม่">
+                      {catSelect(
+                        cat.mother_id,
+                        (v) => setCat({ ...cat, mother_id: v || null }),
+                        "Female",
+                      )}
+                    </Field>
+                    <Field label="พร้อมย้ายบ้าน">
+                      <input
+                        type="date"
+                        value={cat.ready_date || ""}
+                        onChange={(e) =>
+                          setCat({ ...cat, ready_date: e.target.value || null })
+                        }
+                      />
+                    </Field>
+                    <Field label="วันที่ย้ายบ้าน">
+                      <input
+                        type="date"
+                        value={cat.adoption_date || ""}
+                        onChange={(e) =>
+                          setCat({
+                            ...cat,
+                            adoption_date: e.target.value || null,
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="ราคา (ไม่บังคับ)">
+                      <input
+                        type="number"
+                        min="0"
+                        value={cat.price ?? ""}
+                        onChange={(e) =>
+                          setCat({
+                            ...cat,
+                            price:
+                              e.target.value === ""
+                                ? null
+                                : Number(e.target.value),
+                          })
+                        }
+                      />
+                    </Field>
+                    <Field label="รายละเอียด Pedigree">
+                      <input
+                        value={cat.pedigree}
+                        onChange={(e) =>
+                          setCat({ ...cat, pedigree: e.target.value })
+                        }
+                      />
+                    </Field>
+                  </div>
+                  <fieldset>
+                    <legend>รูปประจำตัว</legend>
+                    <MediaEditor
+                      value={cat.portrait ? [cat.portrait] : []}
+                      onChange={(v) =>
+                        setCat({ ...cat, portrait: v.at(-1) || "" })
+                      }
+                      onError={setError}
+                    />
+                  </fieldset>
+                  <fieldset>
+                    <legend>แกลเลอรี</legend>
+                    <MediaEditor
+                      value={cat.photos}
+                      onChange={(v) => setCat({ ...cat, photos: v })}
+                      onError={setError}
+                    />
+                  </fieldset>
+                  <CopyFields
+                    label="บุคลิก"
+                    value={cat.personality}
+                    onChange={(v) => setCat({ ...cat, personality: v })}
+                  />
+                  <CopyFields
+                    label="เรื่องราว"
+                    value={cat.story}
+                    onChange={(v) => setCat({ ...cat, story: v })}
+                  />
+                  <CopyFields
+                    label="ข้อมูลสุขภาพที่เผยแพร่ได้"
+                    value={cat.public_health}
+                    onChange={(v) => setCat({ ...cat, public_health: v })}
+                  />
+                  <div className="admin-form-actions">
+                    {saveButton}
+                    {data.cats.some((c) => c.id === cat.id) && (
+                      <button
+                        type="button"
+                        className="danger-button"
+                        disabled={busy}
+                        onClick={() => {
+                          if (window.confirm(`ลบประวัติ ${cat.name}?`))
+                            void action(async () => {
+                              await removeRecord("cats", cat.id, data);
+                              setCat(null);
+                              await reload();
+                            }, "ลบข้อมูลแล้ว");
+                        }}
+                      >
+                        <Trash2 size={15} />
+                        ลบประวัติ
+                      </button>
+                    )}
+                  </div>
+                </form>
+              ) : (
+                <div className="admin-placeholder">
+                  <Heart />
+                  <p>เลือกสมาชิก หรือกด + เพื่อเพิ่มแมวตัวใหม่</p>
+                </div>
+              )}
+            </div>
+          )}
+          {tab === "litters" && (
+            <div className="admin-split">
+              <aside className="admin-records">
+                <div className="admin-records-heading">
+                  <h3>ครอกลูกแมว</h3>
+                  <button
+                    className="icon-button"
+                    aria-label="Add litter"
+                    onClick={() =>
+                      setLitter({
+                        id: crypto.randomUUID(),
+                        name: "",
+                        father_id: "",
+                        mother_id: "",
+                        birthday: "",
+                      })
+                    }
+                  >
+                    <Plus />
+                  </button>
+                </div>
+                {data.litters.map((l) => (
+                  <button
+                    key={l.id}
+                    className="admin-record"
+                    onClick={() => setLitter({ ...l })}
+                  >
+                    <span>
+                      <strong>{l.name}</strong>
+                      <small>
+                        {l.birthday} ·{" "}
+                        {data.cats.filter((c) => c.litter_id === l.id).length}{" "}
+                        kittens
+                      </small>
+                    </span>
+                  </button>
+                ))}
+              </aside>
+              {litter ? (
+                <form
+                  className="admin-editor"
+                  onSubmit={(e) =>
+                    save(e, async () => {
+                      if (
+                        !litter.father_id ||
+                        !litter.mother_id ||
+                        litter.father_id === litter.mother_id
+                      )
+                        throw new Error("กรุณาเลือกพ่อและแม่ให้ครบ");
+                      for (const id of [litter.father_id, litter.mother_id]) {
+                        const parent = data.cats.find((c) => c.id === id);
+                        if (!parent || parent.birthday >= litter.birthday)
+                          throw new Error("ตรวจสอบวันเกิดและข้อมูลพ่อแม่");
+                      }
+                      const linked = data.cats.filter(
+                        (c) => c.litter_id === litter.id,
+                      );
+                      if (
+                        linked.some(
+                          (c) =>
+                            c.father_id !== litter.father_id ||
+                            c.mother_id !== litter.mother_id,
+                        )
+                      )
+                        throw new Error(
+                          "ครอกมีลูกแมวแล้ว กรุณาจัดการข้อมูลลูกแมวก่อนเปลี่ยนพ่อแม่",
+                        );
+                      await saveRecord("litters", litter);
+                    })
+                  }
+                >
+                  <h2>{litter.name || "ครอกใหม่"}</h2>
+                  <Field label="ชื่อครอก">
+                    <input
+                      required
+                      value={litter.name}
+                      onChange={(e) =>
+                        setLitter({ ...litter, name: e.target.value })
+                      }
+                    />
+                  </Field>
+                  <Field label="วันเกิด">
+                    <input
+                      type="date"
+                      required
+                      value={litter.birthday}
+                      onChange={(e) =>
+                        setLitter({ ...litter, birthday: e.target.value })
+                      }
+                    />
+                  </Field>
+                  <Field label="พ่อ">
+                    <select
+                      required
+                      value={litter.father_id}
+                      onChange={(e) =>
+                        setLitter({ ...litter, father_id: e.target.value })
+                      }
+                    >
+                      <option value="">เลือกพ่อ</option>
+                      {data.cats
+                        .filter((c) => c.gender === "Male")
+                        .map((c) => (
+                          <option value={c.id} key={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                    </select>
+                  </Field>
+                  <Field label="แม่">
+                    <select
+                      required
+                      value={litter.mother_id}
+                      onChange={(e) =>
+                        setLitter({ ...litter, mother_id: e.target.value })
+                      }
+                    >
+                      <option value="">เลือกแม่</option>
+                      {data.cats
+                        .filter((c) => c.gender === "Female")
+                        .map((c) => (
+                          <option value={c.id} key={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                    </select>
+                  </Field>
+                  <p className="admin-help">
+                    เพิ่มลูกแมวในเมนูสมาชิก แล้วเลือกครอกนี้
+                    พ่อแม่และวันเกิดจะถูกเติมให้
+                  </p>
+                  <div className="admin-form-actions">
+                    {saveButton}
+                    <button
+                      type="button"
+                      className="danger-button"
+                      disabled={busy}
+                      onClick={() => {
+                        if (window.confirm("ลบครอกนี้?"))
+                          void action(async () => {
+                            await removeRecord("litters", litter.id, data);
+                            setLitter(null);
+                            await reload();
+                          }, "ลบครอกแล้ว");
+                      }}
+                    >
+                      <Trash2 size={15} />
+                      ลบครอก
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="admin-placeholder">
+                  <p>เลือกครอกหรือสร้างครอกใหม่</p>
+                </div>
+              )}
+            </div>
+          )}
+          {tab === "timeline" && (
+            <div className="admin-split">
+              <aside className="admin-records">
+                <div className="admin-records-heading">
+                  <h3>ความทรงจำ</h3>
+                  <button
+                    className="icon-button"
+                    aria-label="Add timeline event"
+                    onClick={() =>
+                      setEvent({
+                        id: crypto.randomUUID(),
+                        cat_id: data.cats[0]?.id || "",
+                        date: new Date().toISOString().slice(0, 10),
+                        title: copy(),
+                        description: copy(),
+                        photos: [],
+                        video_url: null,
+                      })
+                    }
+                  >
+                    <Plus />
+                  </button>
+                </div>
+                {[...data.events]
+                  .sort((a, b) => b.date.localeCompare(a.date))
+                  .map((ev) => (
+                    <button
+                      key={ev.id}
+                      className="admin-record"
+                      onClick={() => setEvent(structuredClone(ev))}
+                    >
+                      <span>
+                        <strong>{ev.title.en || ev.title.th}</strong>
+                        <small>
+                          {data.cats.find((c) => c.id === ev.cat_id)?.name} ·{" "}
+                          {ev.date}
+                        </small>
+                      </span>
+                    </button>
+                  ))}
+              </aside>
+              {event ? (
+                <form
+                  className="admin-editor"
+                  onSubmit={(e) =>
+                    save(e, async () => {
+                      if (
+                        !data.cats.some((c) => c.id === event.cat_id) ||
+                        !event.date ||
+                        (!event.title.th && !event.title.en)
+                      )
+                        throw new Error(
+                          "กรุณาเลือกแมว วันที่ และชื่อเหตุการณ์",
+                        );
+                      if (
+                        event.video_url &&
+                        !/^https:\/\//i.test(event.video_url)
+                      )
+                        throw new Error("ลิงก์วิดีโอต้องขึ้นต้นด้วย https://");
+                      await saveRecord("timeline_events", event);
+                    })
+                  }
+                >
+                  <h2>บันทึกเรื่องราว</h2>
+                  <Field label="สมาชิก">
+                    <select
+                      required
+                      value={event.cat_id}
+                      onChange={(e) =>
+                        setEvent({ ...event, cat_id: e.target.value })
+                      }
+                    >
+                      <option value="">เลือกสมาชิก</option>
+                      {data.cats.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                          {c.stage === "alumni" ? " · Alumni" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="วันที่">
+                    <input
+                      required
+                      type="date"
+                      value={event.date}
+                      onChange={(e) =>
+                        setEvent({ ...event, date: e.target.value })
+                      }
+                    />
+                  </Field>
+                  <CopyFields
+                    label="ชื่อเหตุการณ์"
+                    value={event.title}
+                    onChange={(v) => setEvent({ ...event, title: v })}
+                  />
+                  <CopyFields
+                    label="เรื่องราว"
+                    value={event.description}
+                    onChange={(v) => setEvent({ ...event, description: v })}
+                  />
+                  <fieldset>
+                    <legend>รูปความทรงจำ</legend>
+                    <MediaEditor
+                      value={event.photos}
+                      onChange={(v) => setEvent({ ...event, photos: v })}
+                      onError={setError}
+                    />
+                  </fieldset>
+                  <Field label="ลิงก์วิดีโอ MP4 / WebM (ไม่บังคับ)">
+                    <input
+                      type="url"
+                      value={event.video_url || ""}
+                      onChange={(e) =>
+                        setEvent({
+                          ...event,
+                          video_url: e.target.value || null,
+                        })
+                      }
+                    />
+                  </Field>
+                  <label className="button outline small upload-label">
+                    <Upload size={15} />
+                    อัปโหลดวิดีโอ
+                    <input
+                      hidden
+                      type="file"
+                      accept="video/mp4,video/webm"
+                      disabled={busy}
+                      onChange={(e) => {
+                        const files = e.target.files;
+                        if (files)
+                          void action(
+                            async () =>
+                              setEvent({
+                                ...event,
+                                video_url: (await uploadMedia(files))[0],
+                              }),
+                            "อัปโหลดแล้ว กดบันทึกเพื่อเผยแพร่",
+                          );
+                      }}
+                    />
+                  </label>
+                  <p className="admin-help">
+                    ใช้ฟอร์มเดียวกันเพื่อเพิ่มภาพและข่าวจากครอบครัวใหม่ในหน้า
+                    Alumni
+                  </p>
+                  <div className="admin-form-actions">
+                    {saveButton}
+                    <button
+                      type="button"
+                      className="danger-button"
+                      disabled={busy}
+                      onClick={() => {
+                        if (window.confirm("ลบความทรงจำนี้?"))
+                          void action(async () => {
+                            await removeRecord(
+                              "timeline_events",
+                              event.id,
+                              data,
+                            );
+                            setEvent(null);
+                            await reload();
+                          }, "ลบเหตุการณ์แล้ว");
+                      }}
+                    >
+                      <Trash2 size={15} />
+                      ลบเหตุการณ์
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="admin-placeholder">
+                  <p>เลือกความทรงจำ หรือเพิ่มเรื่องราวใหม่</p>
+                </div>
+              )}
+            </div>
+          )}
+          {tab === "health" && (
+            <div className="admin-split">
+              <aside className="admin-records">
+                <h3>ข้อมูลส่วนตัว</h3>
+                {data.cats.map((c) => (
+                  <button
+                    key={c.id}
+                    className="admin-record"
+                    onClick={() =>
+                      setHealth(
+                        structuredClone(
+                          data.health.find((h) => h.id === c.id) || {
+                            id: c.id,
+                            notes: "",
+                            records: [],
+                            updated_at: "",
+                          },
+                        ),
+                      )
+                    }
+                  >
+                    <span>
+                      <strong>{c.name}</strong>
+                      <small>
+                        {data.health.some((h) => h.id === c.id)
+                          ? "มีเวชระเบียน"
+                          : "ยังไม่มีเวชระเบียน"}
+                      </small>
+                    </span>
+                  </button>
+                ))}
+              </aside>
+              {health ? (
+                <form
+                  className="admin-editor"
+                  onSubmit={(e) =>
+                    save(e, () =>
+                      saveRecord("private_health", {
+                        ...health,
+                        updated_at: new Date().toISOString(),
+                      }),
+                    )
+                  }
+                >
+                  <h2>
+                    {data.cats.find((c) => c.id === health.id)?.name} · Health
+                  </h2>
+                  <div className="admin-alert">
+                    <LockKeyhole size={18} />
+                    ข้อมูลส่วนนี้เปิดอ่านได้เฉพาะแอดมิน
+                  </div>
+                  <Field label="บันทึกส่วนตัว">
+                    <textarea
+                      rows={10}
+                      value={health.notes}
+                      onChange={(e) =>
+                        setHealth({ ...health, notes: e.target.value })
+                      }
+                    />
+                  </Field>
+                  <div className="private-files">
+                    {health.records.map((path, i) => (
+                      <div key={path}>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            action(async () => {
+                              const blob = await getBlob(ref(storage, path));
+                              const url = URL.createObjectURL(blob);
+                              const a = document.createElement("a");
+                              a.href = url;
+                              a.download = `health-record-${i + 1}.${path.split(".").pop()}`;
+                              a.click();
+                              setTimeout(() => URL.revokeObjectURL(url), 1000);
+                            }, "ดาวน์โหลดไฟล์แล้ว")
+                          }
+                        >
+                          เอกสาร {i + 1} ↗
+                        </button>
+                        <button
+                          type="button"
+                          aria-label={`Remove record ${i + 1}`}
+                          onClick={() =>
+                            setHealth({
+                              ...health,
+                              records: health.records.filter((p) => p !== path),
+                            })
+                          }
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <label className="button outline small upload-label">
+                    <Upload size={15} />
+                    เพิ่มเอกสาร (รูป / PDF)
+                    <input
+                      hidden
+                      multiple
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/avif,application/pdf"
+                      disabled={busy}
+                      onChange={(e) => {
+                        const files = e.target.files;
+                        if (files)
+                          void action(
+                            async () =>
+                              setHealth({
+                                ...health,
+                                records: [
+                                  ...health.records,
+                                  ...(await uploadMedia(files, true)),
+                                ],
+                              }),
+                            "อัปโหลดแล้ว กดบันทึกเพื่อเก็บเอกสาร",
+                          );
+                      }}
+                    />
+                  </label>
+                  <div className="admin-form-actions">{saveButton}</div>
+                </form>
+              ) : (
+                <div className="admin-placeholder">
+                  <LockKeyhole />
+                  <p>เลือกสมาชิกเพื่อดูบันทึกส่วนตัว</p>
+                </div>
+              )}
+            </div>
+          )}
+          {tab === "content" && (
+            <form
+              className="admin-editor content-editor"
+              onSubmit={(e) => save(e, () => saveContent(content))}
+            >
+              <h2>The words of our home.</h2>
+              <label className="admin-checkbox">
+                <input
+                  type="checkbox"
+                  checked={content.sample_mode === true}
+                  onChange={(e) =>
+                    setContent({ ...content, sample_mode: e.target.checked })
+                  }
+                />
+                แสดงข้อความว่าเป็นภาพและข้อมูลตัวอย่าง
+              </label>
+              <CopyFields
+                label="คำแนะนำบ้าน Fuwamiro"
+                value={content.intro}
+                onChange={(v) => setContent({ ...content, intro: v })}
+              />
+              <CopyFields
+                label="แนวทางการเลี้ยงดู"
+                value={content.philosophy}
+                onChange={(v) => setContent({ ...content, philosophy: v })}
+              />
+              <CopyFields
+                label="แนวทางดูแลสุขภาพ"
+                value={content.health}
+                onChange={(v) => setContent({ ...content, health: v })}
+              />
+              <CopyFields
+                label="สถานที่ / การนัดหมาย"
+                value={content.location}
+                onChange={(v) => setContent({ ...content, location: v })}
+              />
+              <div className="form-grid">
+                {(
+                  [
+                    "line_url",
+                    "facebook_url",
+                    "instagram_url",
+                    "email",
+                  ] as const
+                ).map((key) => (
+                  <Field
+                    key={key}
+                    label={
+                      {
+                        line_url: "LINE URL",
+                        facebook_url: "Facebook URL",
+                        instagram_url: "Instagram URL",
+                        email: "อีเมลติดต่อ",
+                      }[key]
+                    }
+                  >
+                    <input
+                      type={key === "email" ? "email" : "url"}
+                      value={content[key]}
+                      onChange={(e) =>
+                        setContent({ ...content, [key]: e.target.value })
+                      }
+                    />
+                  </Field>
+                ))}
+              </div>
+              {saveButton}
+            </form>
+          )}
+        </>
+      )}
+    </section>
+  );
+}

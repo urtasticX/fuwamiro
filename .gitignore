@@ -7,4 +7,5 @@ out/
 .DS_Store
 artifacts/
 firebase-debug.log*
-.openai/
+firestore-debug.log*
+.sites-checkout/
