@@ -981,8 +981,8 @@ export function Admin() {
                       value={cat.photos}
                       onChange={(v) => setCat({ ...cat, photos: v })}
                       onError={setError}
-                      hint="ขนาดแนะนำ 1600 × 1200 พิกเซล (แนวนอน 4:3)"
-                      cropSize={{ width: 1600, height: 1200 }}
+                      hint="ขนาดแนะนำ 1200 × 1600 พิกเซล (แนวตั้ง 3:4)"
+                      cropSize={{ width: 1200, height: 1600 }}
                     />
                   </fieldset>
                   <CopyFields
@@ -1306,8 +1306,8 @@ export function Admin() {
                       value={event.photos}
                       onChange={(v) => setEvent({ ...event, photos: v })}
                       onError={setError}
-                      hint="ขนาดแนะนำ 1600 × 1200 พิกเซล (แนวนอน 4:3)"
-                      cropSize={{ width: 1600, height: 1200 }}
+                      hint="ขนาดแนะนำ 1200 × 1600 พิกเซล (แนวตั้ง 3:4)"
+                      cropSize={{ width: 1200, height: 1600 }}
                     />
                   </fieldset>
                   <Field label="ลิงก์วิดีโอ MP4 / WebM (ไม่บังคับ)">
