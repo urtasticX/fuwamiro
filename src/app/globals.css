@@ -1133,7 +1133,7 @@ html[lang="th"] .story-copy > p {
   align-items: center;
 }
 .profile-portrait {
-  height: 600px;
+  aspect-ratio: 3 / 4;
   position: relative;
   border-radius: 120px 120px 12px 12px;
   overflow: hidden;
@@ -1957,9 +1957,6 @@ label select:focus {
   .care-intro {
     gap: 50px;
   }
-  .profile-portrait {
-    height: 540px;
-  }
   .contact-layout {
     gap: 50px;
   }
@@ -2067,9 +2064,6 @@ label select:focus {
   }
   .profile-intro h1 {
     font-size: 56px;
-  }
-  .profile-portrait {
-    height: 500px;
   }
   .timeline-event {
     gap: 60px;
@@ -2545,7 +2539,6 @@ label select:focus {
     margin-bottom: 22px;
   }
   .profile-portrait {
-    height: 460px;
     border-radius: 95px 95px 10px 10px;
   }
   .profile-intro h1 {
