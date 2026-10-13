@@ -671,7 +671,7 @@ html[lang="th"] .story-copy > p {
   transform: translateY(-6px);
 }
 .cat-card-image {
-  height: 350px;
+  aspect-ratio: 3 / 4;
   position: relative;
   border-radius: 13px;
   overflow: hidden;
@@ -1931,9 +1931,6 @@ label select:focus {
     width: 165px;
     height: 185px;
   }
-  .cat-card-image {
-    height: 300px;
-  }
   .profile-link {
     display: none;
   }
@@ -2028,9 +2025,6 @@ label select:focus {
   }
   .cat-grid {
     gap: 20px;
-  }
-  .cat-card-image {
-    height: 280px;
   }
   .cat-card-info h3 {
     font-size: 20px;
@@ -2346,7 +2340,6 @@ label select:focus {
     gap: 22px 15px;
   }
   .cat-card-image {
-    height: 230px;
     border-radius: 10px;
   }
   .cat-card-info {
@@ -2751,9 +2744,6 @@ label select:focus {
   }
   .hero-visual {
     height: 425px;
-  }
-  .cat-card-image {
-    height: 205px;
   }
   .cat-card-info h3 {
     font-size: 18px;
