@@ -85,6 +85,7 @@ test("Media upload checks role, file type and private record access", async () =
     .authenticatedContext("claim-admin", { admin: true })
     .storage();
   const documentAdmin = env.authenticatedContext("approved-admin").storage();
+  const ownerAdmin = env.authenticatedContext("exzIcghyLQQwvikESMPirMyDf8Z2").storage();
   await assertFails(
     uploadBytes(ref(visitor, "public/cat.webp"), new Uint8Array([1, 2, 3]), {
       contentType: "image/webp",
@@ -97,6 +98,11 @@ test("Media upload checks role, file type and private record access", async () =
   );
   await assertSucceeds(
     uploadBytes(ref(documentAdmin, "public/cat-by-approved-admin.png"), new Uint8Array([1, 2, 3]), {
+      contentType: "image/png",
+    }),
+  );
+  await assertSucceeds(
+    uploadBytes(ref(ownerAdmin, "public/cat-by-owner.png"), new Uint8Array([1, 2, 3]), {
       contentType: "image/png",
     }),
   );
