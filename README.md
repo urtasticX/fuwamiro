@@ -16,6 +16,8 @@ npm run build
 
 The application uses a static Next.js export in `out/`. Firestore content is loaded in the browser. Optional Firebase configuration overrides are documented in `.env.example`.
 
+The site is hosted at [fuwamiro.web.app](https://fuwamiro.web.app). To publish an update, run `npm run build` followed by `firebase deploy --only hosting --project fuwamiro` with a Firebase account that has access to this project.
+
 See [Firebase setup](FIREBASE_SETUP.md) for database collections, access rules, and remaining console setup.
 
 ## Current state

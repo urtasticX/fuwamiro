@@ -9,3 +9,4 @@ artifacts/
 firebase-debug.log*
 firestore-debug.log*
 .sites-checkout/
+.firebase/
