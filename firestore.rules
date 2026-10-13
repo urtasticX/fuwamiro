@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+    // These collections contain PUBLIC information only.
+    match /cats/{id} {
+      allow read: if true;
+      allow create, update: if isAdmin() && request.resource.data.id == id
+        && !request.resource.data.keys().hasAny(['private_health', 'private_notes', 'owner_email']);
+      allow delete: if isAdmin();
+    }
+    match /timeline_events/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /litters/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /site_content/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    // Medical documents and owner details never belong in public cat records.
+    match /private_health/{id} {
+      allow read, write: if isAdmin();
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

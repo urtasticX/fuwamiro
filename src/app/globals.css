@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* Base stylesheet. The full visual design is still in progress. */
+:root { color: #34495e; background: #fff; font-family: Arial, sans-serif; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: inherit; }
+button, input, textarea, select { font: inherit; }
+:focus-visible { outline: 2px solid #73bce8; outline-offset: 4px; }
