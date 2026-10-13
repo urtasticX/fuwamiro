@@ -269,22 +269,24 @@ svg {
 .nav-item > a.active:after {
   content: "";
   position: absolute;
-  bottom: 9px;
+  bottom: 7px;
   left: 50%;
-  width: 6px;
-  height: 6px;
+  transform: translateX(-50%);
+  width: 9px;
+  height: 9px;
   background: #7db4d0;
   border-radius: 50%;
 }
 .contact-nav.active::after, .mobile-contact.active::after {
   content: "";
   display: block;
-  width: 6px;
-  height: 6px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: #7db4d0;
   position: absolute;
-  left: calc(50% - 3px);
+  left: 50%;
+  transform: translateX(-50%);
   bottom: -10px;
 }
 .contact-nav, .mobile-contact { position: relative; }
@@ -2179,6 +2181,7 @@ label select:focus {
     left: auto;
     right: 10px;
     bottom: 23px;
+    transform: none;
   }
   .subnav {
     display: flex;
