@@ -103,6 +103,13 @@ function CopyFields({
           onChange={(e) => onChange({ ...value, th: e.target.value })}
         />
       </Field>
+      <Field label="English">
+        <textarea
+          rows={3}
+          value={value.en}
+          onChange={(e) => onChange({ ...value, en: e.target.value })}
+        />
+      </Field>
     </fieldset>
   );
 }

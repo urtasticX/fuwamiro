@@ -57,12 +57,12 @@ export function AnimatedTimeline({
                   controls
                   preload="metadata"
                   src={event.video_url}
-                  aria-label={`วิดีโอ ${t(event.title)}`}
+                  aria-label={`${t(event.title)} video`}
                 />
               )}
             </div>
             <span className="timeline-chapter">
-              ตอนที่ {String(index + 1).padStart(2, "0")}
+              CHAPTER {String(index + 1).padStart(2, "0")}
             </span>
           </motion.article>
         ))}
@@ -70,8 +70,8 @@ export function AnimatedTimeline({
         <span className="pulse-heart">
           <Heart size={19} />
         </span>
-        <span className="eyebrow">วันนี้และทุกวันต่อจากนี้</span>
-        <h3>เติบโตอย่างมีความสุข</h3>
+        <span className="eyebrow">TODAY & EVERY DAY</span>
+        <h3>Living My Best Life</h3>
         <p>
           {locale === "th"
             ? "และเรื่องราวแห่งความรักยังคงดำเนินต่อไป…"

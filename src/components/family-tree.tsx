@@ -42,22 +42,22 @@ export function FamilyTree({ cat }: { cat: Cat }) {
   return (
     <div className="family-tree">
       <div className="tree-row parents">
-        {node(father, "พ่อ")}
-        {node(mother, "แม่")}
+        {node(father, "FATHER")}
+        {node(mother, "MOTHER")}
       </div>
       <div className="tree-stem" />
-      {node(cat, "สมาชิกของบ้าน", true)}
+      {node(cat, "OUR LITTLE CONNECTION", true)}
       {children.length > 0 && (
         <>
           <div className="tree-stem" />
           <div className="tree-row children">
-            {children.map((c) => node(c, "ลูกของ " + cat.name))}
+            {children.map((c) => node(c, "LITTLE " + c.name.toUpperCase()))}
           </div>
         </>
       )}
       {related.length > 0 && (
         <div className="related-litters">
-          <span className="eyebrow">ครอกที่เกี่ยวข้อง</span>
+          <span className="eyebrow">RELATED LITTERS</span>
           {related.map((l) => (
             <Link key={l.id} href={`/kittens?litter=${l.id}`}>
               {l.name} <span>↗</span>

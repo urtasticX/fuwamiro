@@ -47,9 +47,17 @@ export function Providers({ children }: { children: ReactNode }) {
     "loading" | "connected" | "error"
   >("loading");
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  useEffect(() => {
+    const saved = localStorage.getItem("fuwamiro-language");
+    if (saved === "en" || saved === "th") {
+      setLocaleState(saved);
+      document.documentElement.lang = saved;
+    }
+  }, []);
   function setLocale(l: Locale) {
-    setLocaleState("th");
-    document.documentElement.lang = "th";
+    setLocaleState(l);
+    localStorage.setItem("fuwamiro-language", l);
+    document.documentElement.lang = l;
   }
   async function refresh() {
     setConnectionStatus("loading");
@@ -91,7 +99,7 @@ export function Providers({ children }: { children: ReactNode }) {
       value={{
         locale,
         setLocale,
-        t: (c) => c.th || c.en,
+        t: (c) => c[locale] || c.en,
         cats,
         events,
         litters,

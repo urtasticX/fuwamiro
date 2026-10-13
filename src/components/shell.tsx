@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   ArrowUpRight,
+  ChevronDown,
   Heart,
   Menu,
   X,
@@ -14,7 +15,7 @@ import { useSite } from "./providers";
 export function Brand() {
   const { content } = useSite();
   return (
-    <Link href="/" className="brand" aria-label="หน้าแรก Fuwamiro">
+    <Link href="/" className="brand" aria-label="Fuwamiro home">
       {content.icon_url ? <img className="brand-icon" src={content.icon_url} alt="" /> : <svg
         width="38"
         height="36"
@@ -43,22 +44,23 @@ export function Brand() {
       </svg>}
       <span>
         fuwamiro<span className="brand-dot">.</span>
-        <small>บ้านเล็ก ๆ ที่เต็มไปด้วยความรัก</small>
+        <small>A LITTLE HOME, A LOT OF LOVE</small>
       </span>
     </Link>
   );
 }
 const links = [
-  ["/", "หน้าแรก"],
-  ["/family", "ครอบครัวของเรา"],
-  ["/kittens", "ลูกแมวหาบ้าน"],
-  ["/alumni", "สมาชิกที่ย้ายบ้าน"],
-  ["/health", "สุขภาพและการดูแล"],
+  ["/", "Home"],
+  ["/family", "Our Family"],
+  ["/kittens", "Available Kittens"],
+  ["/alumni", "Our Alumni"],
+  ["/health", "Health & Care"],
 ];
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { locale, setLocale } = useSite();
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 20);
     fn();
@@ -77,40 +79,49 @@ export function Navbar() {
   return (
     <>
       <div className="announcement">
-        เลี้ยงดูด้วยหัวใจ รักตลอดไป <Heart size={11} />
+        Thoughtfully raised. Endlessly loved. <Heart size={11} />
       </div>
       <header className={`header ${scrolled ? "scrolled" : ""}`}>
         <div className="nav-wrap">
           <Brand />
           <nav
             className={open ? "nav-links open" : "nav-links"}
-            aria-label="เมนูหลัก"
+            aria-label="Main navigation"
           >
             {links.map(([href, label]) => (
               <div className="nav-item" key={href}>
                 <Link className={pathname === href || (href === "/family" && ["/kings", "/queens"].includes(pathname)) ? "active" : ""} href={href}>
                   {label}
+                  {href === "/family" && <ChevronDown size={12} />}
                 </Link>
                 {href === "/family" && (
                   <div className="subnav">
-                    <Link href="/kings">พ่อพันธุ์</Link>
-                    <Link href="/queens">แม่พันธุ์</Link>
-                    <Link href="/family?filter=retired">สมาชิกวัยเกษียณ</Link>
+                    <Link href="/kings">Our Kings</Link>
+                    <Link href="/queens">Our Queens</Link>
+                    <Link href="/family?filter=retired">Retired & loved</Link>
                   </div>
                 )}
               </div>
             ))}
             <Link href="/contact" className={`mobile-contact ${pathname === "/contact" ? "active" : ""}`}>
-              ติดต่อเรา
+              Contact Us
             </Link>
           </nav>
           <div className="nav-actions">
+            <button
+              className="language"
+              onClick={() => setLocale(locale === "th" ? "en" : "th")}
+              aria-label={`Switch to ${locale === "th" ? "English" : "Thai"}`}
+            >
+              {locale.toUpperCase()}
+              <ChevronDown size={11} />
+            </button>
             <Link href="/contact" className={`button small contact-nav ${pathname === "/contact" ? "active" : ""}`}>
-              พูดคุยกับเรา <ArrowUpRight size={15} />
+              Let’s talk <ArrowUpRight size={15} />
             </Link>
             <button
               className="menu-toggle icon-button"
-              aria-label={open ? "ปิดเมนู" : "เปิดเมนู"}
+              aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               onClick={() => setOpen(!open)}
             >
@@ -123,14 +134,16 @@ export function Navbar() {
   );
 }
 export function Footer() {
-  const { content, isDemo } = useSite();
+  const { locale, content, isDemo } = useSite();
   return (
     <footer>
       <div className="container footer-main">
         <div className="footer-brand">
           <Brand />
           <p>
-            ความรักเล็ก ๆ ที่ทำให้บ้านอบอุ่นขึ้นทุกวัน
+            {locale === "th"
+              ? "ความรักเล็ก ๆ ที่ทำให้บ้านอบอุ่นขึ้นทุกวัน"
+              : "Little companions. A lifetime of love."}
           </p>
           <div className="social-row">
             <Link
@@ -151,35 +164,39 @@ export function Footer() {
           </div>
         </div>
         <div>
-          <span className="footer-title">ครอบครัวของเรา</span>
-          <Link href="/family">รู้จักสมาชิก</Link>
-          <Link href="/kings">พ่อพันธุ์</Link>
-          <Link href="/queens">แม่พันธุ์</Link>
-          <Link href="/kittens">ลูกแมวหาบ้าน</Link>
+          <span className="footer-title">OUR LITTLE WORLD</span>
+          <Link href="/family">Meet Our Family</Link>
+          <Link href="/kings">Our Kings</Link>
+          <Link href="/queens">Our Queens</Link>
+          <Link href="/kittens">Available Kittens</Link>
         </div>
         <div>
-          <span className="footer-title">ดูเพิ่มเติม</span>
-          <Link href="/alumni">สมาชิกที่ย้ายบ้าน</Link>
-          <Link href="/health">สุขภาพและการดูแล</Link>
-          <Link href="/contact">ติดต่อเรา</Link>
-          <Link href="/admin">จัดการเว็บไซต์</Link>
+          <span className="footer-title">STAY A LITTLE LONGER</span>
+          <Link href="/alumni">Our Alumni</Link>
+          <Link href="/health">Health & Care</Link>
+          <Link href="/contact">Contact Us</Link>
+          <Link href="/admin">Cattery Admin</Link>
         </div>
         <div className="footer-note">
           <Heart size={22} strokeWidth={1} />
           <p>
-            อุ้งเท้าเล็ก ๆ
+            Small paws.
             <br />
-            จุดเริ่มต้นที่งดงาม
+            Beautiful beginnings.
           </p>
-          <span>{content.location.th}</span>
+          <span>{content.location[locale]}</span>
         </div>
       </div>
       <div className="container footer-bottom">
         <span>© {new Date().getFullYear()} Fuwamiro Cattery</span>
         <span>
-          {isDemo ? "ภาพและข้อมูลแมวเป็นตัวอย่างสำหรับการออกแบบเว็บไซต์" : "สร้างด้วยความรักและความใส่ใจ"}
+          {isDemo
+            ? locale === "th"
+              ? "ภาพและข้อมูลแมวเป็นตัวอย่างสำหรับการออกแบบเว็บไซต์"
+              : "Illustrative photography and sample cat profiles."
+            : "Made with a little extra love."}
         </span>
-        <span>ด้วยความรักเสมอ ♡</span>
+        <span>WITH LOVE, ALWAYS ♡</span>
       </div>
     </footer>
   );
