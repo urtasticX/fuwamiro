@@ -457,7 +457,7 @@ export function Admin() {
           <h1>
             <em>บ้านของเรา</em>
           </h1>
-          <p>{user.email}</p>
+          <p>เข้าสู่ระบบในฐานะแอดมิน · {user.email}</p>
         </div>
         <div className="admin-heading-actions">
           <button
@@ -1273,7 +1273,7 @@ export function Admin() {
                   </h2>
                   <div className="admin-alert">
                     <LockKeyhole size={18} />
-                    ข้อมูลส่วนนี้เปิดอ่านได้เฉพาะแอดมิน
+                    ข้อมูลส่วนตัว ผู้เยี่ยมชมทั่วไปมองไม่เห็นเวชระเบียนนี้
                   </div>
                   <Field label="บันทึกส่วนตัว">
                     <textarea
