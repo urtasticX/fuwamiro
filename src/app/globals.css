@@ -358,6 +358,14 @@ svg {
   margin-bottom: 25px;
   font-weight: 450;
 }
+.hero-love-break {
+  display: none;
+}
+@media (min-width: 1101px) {
+  .hero-love-break {
+    display: inline;
+  }
+}
 .hero-copy h1 em {
   white-space: nowrap;
 }
@@ -2224,7 +2232,7 @@ label select:focus {
     line-height: 1.04;
     margin-bottom: 23px;
   }
-  .hero-copy h1 br:nth-of-type(2) {
+  .hero-copy h1 .hero-care-break {
     display: none;
   }
   .hero-copy .eyebrow {

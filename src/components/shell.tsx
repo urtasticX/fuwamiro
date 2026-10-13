@@ -77,6 +77,7 @@ export function Navbar() {
     window.addEventListener("keydown", fn);
     return () => window.removeEventListener("keydown", fn);
   }, [open]);
+  if (activePath === "/admin") return null;
   return (
     <>
       <div className="announcement">
@@ -136,6 +137,8 @@ export function Navbar() {
 }
 export function Footer() {
   const { locale, content, isDemo } = useSite();
+  const pathname = usePathname();
+  if (pathname.replace(/\/+$/, "") === "/admin") return null;
   return (
     <footer>
       <div className="container footer-main">

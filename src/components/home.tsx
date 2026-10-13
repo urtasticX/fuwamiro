@@ -47,10 +47,10 @@ export function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.12 }}
           >
-            Raised with <em>Love,</em>
+            Raised with <br className="hero-love-break" /><em>Love,</em>
             <br />
             Growing
-            <br /> with Care<span className="title-dot">.</span>
+            <br className="hero-care-break" /> with Care<span className="title-dot">.</span>
           </motion.h1>
           <Reveal delay={0.22}>
             <p className="hero-subtitle">
