@@ -97,10 +97,12 @@ export function SectionHeading({
   );
 }
 export function StatusBadge({ status }: { status: string }) {
+  const { locale } = useSite();
+  const th: Record<string, string> = { Available: "พร้อมย้ายบ้าน", Reserved: "จองแล้ว", "Under Evaluation": "กำลังประเมิน", Sold: "ย้ายบ้านแล้ว", Staying: "อยู่กับเรา" };
   return (
     <span className={`status ${status.toLowerCase().replaceAll(" ", "-")}`}>
       <i />
-      {status}
+      {locale === "th" ? th[status] || status : status}
     </span>
   );
 }
@@ -119,7 +121,7 @@ export function CatCard({ cat, index = 0 }: { cat: Cat; index?: number }) {
             <StatusBadge status={cat.availability} />
           ) : (
             <span className="card-label">
-              {cat.stage === "retired"
+              {locale === "th" ? (cat.stage === "retired" ? "ปลดประจำการและเป็นที่รัก" : cat.stage === "alumni" ? "รักเสมอ" : cat.gender === "Male" ? "พ่อพันธุ์ของเรา" : "แม่พันธุ์ของเรา") : cat.stage === "retired"
                 ? "Retired & loved"
                 : cat.stage === "alumni"
                   ? "Forever loved"

@@ -22,9 +22,9 @@ export function Profile() {
   if (!cat)
     return (
       <div className="container empty-state">
-        <h1>A little face we couldn’t find.</h1>
+        <h1>{locale === "th" ? "ไม่พบข้อมูลน้องแมว" : "A little face we couldn’t find."}</h1>
         <Link href="/family" className="button">
-          Meet our family <ArrowUpRight size={16} />
+          {locale === "th" ? "ทำความรู้จักครอบครัวของเรา" : "Meet our family"} <ArrowUpRight size={16} />
         </Link>
       </div>
     );
@@ -44,12 +44,12 @@ export function Profile() {
             kitten ? "/kittens" : cat.stage === "alumni" ? "/alumni" : "/family"
           }
         >
-          <ArrowLeft size={15} /> Back to{" "}
+          <ArrowLeft size={15} /> {locale === "th" ? "กลับไปที่" : "Back to"}{" "}
           {kitten
-            ? "our kittens"
+            ? (locale === "th" ? "ลูกแมว" : "our kittens")
             : cat.stage === "alumni"
-              ? "our alumni"
-              : "our family"}
+              ? (locale === "th" ? "บ้านใหม่ของน้อง" : "our alumni")
+              : (locale === "th" ? "ครอบครัวของเรา" : "our family")}
         </Link>
         <div className="profile-hero-grid">
           <Reveal className="profile-portrait">
@@ -60,12 +60,12 @@ export function Profile() {
               sizes="(max-width: 700px) 100vw, 50vw"
             />
             <span className="portrait-caption">
-              A LITTLE PORTRAIT OF {cat.name.toUpperCase()}
+              {locale === "th" ? "ภาพของ" : "A LITTLE PORTRAIT OF"} {cat.name.toUpperCase()}
             </span>
           </Reveal>
           <Reveal className="profile-intro">
             <Eyebrow>
-              {kitten
+              {locale === "th" ? (kitten ? "ลูกแมวของเรา" : cat.stage === "alumni" ? "เป็นครอบครัวของเราเสมอ" : cat.stage === "retired" ? "พักผ่อนและเป็นที่รัก" : cat.gender === "Male" ? "พ่อพันธุ์ของเรา" : "แม่พันธุ์ของเรา") : kitten
                 ? "OUR LITTLE ONE"
                 : cat.stage === "alumni"
                   ? "FOREVER PART OF OUR FAMILY"
@@ -76,53 +76,53 @@ export function Profile() {
                       : "MEET OUR QUEEN"}
             </Eyebrow>
             <h1>
-              Hello, I’m
+              {locale === "th" ? "สวัสดี ฉันชื่อ" : "Hello, I’m"}
               <br />
               <em>{cat.name}.</em>
             </h1>
             {cat.nickname && (
               <p className="new-name">
-                Now called {cat.nickname} by my forever family ♡
+                {locale === "th" ? `ครอบครัวใหม่เรียกฉันว่า ${cat.nickname}` : `Now called ${cat.nickname} by my forever family`} ♡
               </p>
             )}
             <p className="profile-personality">{t(cat.personality)}</p>
             {kitten && <StatusBadge status={cat.availability} />}
             <dl className="profile-facts">
               <div>
-                <dt>BREED</dt>
+                <dt>{locale === "th" ? "สายพันธุ์" : "BREED"}</dt>
                 <dd>{cat.breed}</dd>
               </div>
               <div>
-                <dt>GENDER</dt>
+                <dt>{locale === "th" ? "เพศ" : "GENDER"}</dt>
                 <dd>
-                  {cat.gender} {cat.gender === "Male" ? "♂" : "♀"}
+                  {locale === "th" ? (cat.gender === "Male" ? "ผู้" : "เมีย") : cat.gender} {cat.gender === "Male" ? "♂" : "♀"}
                 </dd>
               </div>
               <div>
-                <dt>COAT COLOUR</dt>
+                <dt>{locale === "th" ? "สีขน" : "COAT COLOUR"}</dt>
                 <dd>
                   {cat.color} · {cat.color_code}
                 </dd>
               </div>
               <div>
-                <dt>BIRTHDAY</dt>
+                <dt>{locale === "th" ? "วันเกิด" : "BIRTHDAY"}</dt>
                 <dd>{formatDate(cat.birthday, locale)}</dd>
               </div>
               {cat.ready_date && (
                 <div>
-                  <dt>READY FOR HOME</dt>
+                  <dt>{locale === "th" ? "พร้อมย้ายบ้าน" : "READY FOR HOME"}</dt>
                   <dd>{formatDate(cat.ready_date, locale)}</dd>
                 </div>
               )}
               {cat.adoption_date && (
                 <div>
-                  <dt>FOREVER HOME SINCE</dt>
+                  <dt>{locale === "th" ? "ย้ายบ้านเมื่อ" : "FOREVER HOME SINCE"}</dt>
                   <dd>{formatDate(cat.adoption_date, locale)}</dd>
                 </div>
               )}
               {cat.price != null && (
                 <div>
-                  <dt>ADOPTION FEE</dt>
+                  <dt>{locale === "th" ? "ค่ารับเลี้ยง" : "ADOPTION FEE"}</dt>
                   <dd>฿{cat.price.toLocaleString()}</dd>
                 </div>
               )}
@@ -138,29 +138,29 @@ export function Profile() {
                 className="button"
                 href={content.line_url || `/contact?cat=${cat.id}`}
               >
-                Ask about {cat.name} on LINE <ArrowUpRight size={17} />
+                {locale === "th" ? `สอบถามเรื่อง ${cat.name} ทาง LINE` : `Ask about ${cat.name} on LINE`} <ArrowUpRight size={17} />
               </Link>
             ) : (
               <a className="text-link" href="#journey">
-                Follow my little journey <ArrowUpRight size={17} />
+                {locale === "th" ? "ติดตามเรื่องราวของฉัน" : "Follow my little journey"} <ArrowUpRight size={17} />
               </a>
             )}
           </Reveal>
         </div>
       </section>
       <nav className="profile-tabs" aria-label="Profile sections">
-        <a href="#about-me">About me</a>
-        <a href="#journey">My journey</a>
-        <a href="#my-family">My family</a>
-        <a href="#little-moments">Little moments</a>
+        <a href="#about-me">{locale === "th" ? "เกี่ยวกับฉัน" : "About me"}</a>
+        <a href="#journey">{locale === "th" ? "เรื่องราวของฉัน" : "My journey"}</a>
+        <a href="#my-family">{locale === "th" ? "ครอบครัวของฉัน" : "My family"}</a>
+        <a href="#little-moments">{locale === "th" ? "ภาพความทรงจำ" : "Little moments"}</a>
       </nav>
       <section id="about-me" className="container section about-profile">
         <Reveal>
-          <Eyebrow>A LITTLE MORE ABOUT ME</Eyebrow>
+          <Eyebrow>{locale === "th" ? "มารู้จักฉันให้มากขึ้น" : "A LITTLE MORE ABOUT ME"}</Eyebrow>
           <h2>
-            Small things.
+            {locale === "th" ? "ตัวเล็ก ๆ" : "Small things."}
             <br />
-            <em>Big personality.</em>
+            <em>{locale === "th" ? "แต่มีเรื่องราวมากมาย" : "Big personality."}</em>
           </h2>
         </Reveal>
         <Reveal>
@@ -168,10 +168,10 @@ export function Profile() {
           <div className="health-note">
             <ShieldCheck size={23} />
             <div>
-              <h4>Growing with care</h4>
+              <h4>{locale === "th" ? "เติบโตด้วยความใส่ใจ" : "Growing with care"}</h4>
               <p>{t(cat.public_health)}</p>
               <Link href="/health" className="text-link">
-                Our approach to care <ArrowUpRight size={14} />
+                {locale === "th" ? "การดูแลของเรา" : "Our approach to care"} <ArrowUpRight size={14} />
               </Link>
             </div>
           </div>
@@ -179,9 +179,9 @@ export function Profile() {
       </section>
       <section id="journey" className="container section journey-section">
         <Reveal className="center-heading">
-          <Eyebrow>EVERY LITTLE MOMENT MATTERS</Eyebrow>
+          <Eyebrow>{locale === "th" ? "ทุกช่วงเวลามีความหมาย" : "EVERY LITTLE MOMENT MATTERS"}</Eyebrow>
           <h2>
-            My <em>journey.</em>
+            {locale === "th" ? <>เรื่องราว<em>ของฉัน</em></> : <>My <em>journey.</em></>}
           </h2>
           <p>
             {locale === "th"
@@ -197,9 +197,9 @@ export function Profile() {
       <section id="my-family" className="family-tree-section section">
         <div className="container">
           <Reveal className="center-heading">
-            <Eyebrow>CONNECTED BY A LITTLE LOVE</Eyebrow>
+            <Eyebrow>{locale === "th" ? "สายใยแห่งความรัก" : "CONNECTED BY A LITTLE LOVE"}</Eyebrow>
             <h2>
-              My <em>family.</em>
+              {locale === "th" ? <>ครอบครัว<em>ของฉัน</em></> : <>My <em>family.</em></>}
             </h2>
             <p>
               {locale === "th"
@@ -212,11 +212,9 @@ export function Profile() {
       </section>
       <section id="little-moments" className="container section">
         <SectionHeading
-          eyebrow="THE EVERYDAY KIND OF BEAUTIFUL"
+          eyebrow={locale === "th" ? "ความสุขในทุกวัน" : "THE EVERYDAY KIND OF BEAUTIFUL"}
           title={
-            <>
-              Little <em>moments.</em>
-            </>
+            locale === "th" ? <>ภาพ<em>ความทรงจำ</em></> : <>Little <em>moments.</em></>
           }
           description={
             locale === "th"
@@ -228,7 +226,7 @@ export function Profile() {
       </section>
       <div className="profile-end">
         <Heart size={20} />
-        <p>Every little paw has a story to tell.</p>
+        <p>{locale === "th" ? "ทุกอุ้งเท้าเล็ก ๆ มีเรื่องราวของตัวเอง" : "Every little paw has a story to tell."}</p>
       </div>
       <ContactCTA />
     </>

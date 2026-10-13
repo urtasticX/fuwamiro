@@ -62,7 +62,7 @@ export function AnimatedTimeline({
               )}
             </div>
             <span className="timeline-chapter">
-              CHAPTER {String(index + 1).padStart(2, "0")}
+              {locale === "th" ? "บทที่" : "CHAPTER"} {String(index + 1).padStart(2, "0")}
             </span>
           </motion.article>
         ))}
@@ -70,8 +70,8 @@ export function AnimatedTimeline({
         <span className="pulse-heart">
           <Heart size={19} />
         </span>
-        <span className="eyebrow">TODAY & EVERY DAY</span>
-        <h3>Living My Best Life</h3>
+        <span className="eyebrow">{locale === "th" ? "วันนี้และทุกวัน" : "TODAY & EVERY DAY"}</span>
+        <h3>{locale === "th" ? "ใช้ชีวิตอย่างมีความสุข" : "Living My Best Life"}</h3>
         <p>
           {locale === "th"
             ? "และเรื่องราวแห่งความรักยังคงดำเนินต่อไป…"

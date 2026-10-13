@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useSite } from "./providers";
 export function Brand() {
-  const { content } = useSite();
+  const { content, locale } = useSite();
   return (
     <Link href="/" className="brand" aria-label="Fuwamiro home">
       {content.icon_url ? <img className="brand-icon" src={content.icon_url} alt="" /> : <svg
@@ -44,18 +44,18 @@ export function Brand() {
       </svg>}
       <span>
         fuwamiro<span className="brand-dot">.</span>
-        <small>A LITTLE HOME, A LOT OF LOVE</small>
+        <small>{locale === "th" ? "บ้านเล็ก ๆ ที่เต็มไปด้วยความรัก" : "A LITTLE HOME, A LOT OF LOVE"}</small>
       </span>
     </Link>
   );
 }
 const links = [
-  ["/", "Home"],
-  ["/family", "Our Family"],
-  ["/kittens", "Available Kittens"],
-  ["/alumni", "Our Alumni"],
-  ["/health", "Health & Care"],
-];
+  ["/", "หน้าแรก", "Home"],
+  ["/family", "ครอบครัวของเรา", "Our Family"],
+  ["/kittens", "ลูกแมวหาบ้าน", "Available Kittens"],
+  ["/alumni", "สมาชิกที่ย้ายบ้าน", "Our Alumni"],
+  ["/health", "สุขภาพและการดูแล", "Health & Care"],
+] as const;
 export function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -79,7 +79,7 @@ export function Navbar() {
   return (
     <>
       <div className="announcement">
-        Thoughtfully raised. Endlessly loved. <Heart size={11} />
+        {locale === "th" ? "เลี้ยงดูด้วยหัวใจ รักตลอดไป" : "Thoughtfully raised. Endlessly loved."} <Heart size={11} />
       </div>
       <header className={`header ${scrolled ? "scrolled" : ""}`}>
         <div className="nav-wrap">
@@ -88,23 +88,23 @@ export function Navbar() {
             className={open ? "nav-links open" : "nav-links"}
             aria-label="Main navigation"
           >
-            {links.map(([href, label]) => (
+            {links.map(([href, th, en]) => (
               <div className="nav-item" key={href}>
                 <Link className={pathname === href || (href === "/family" && ["/kings", "/queens"].includes(pathname)) ? "active" : ""} href={href}>
-                  {label}
+                  {locale === "th" ? th : en}
                   {href === "/family" && <ChevronDown size={12} />}
                 </Link>
                 {href === "/family" && (
                   <div className="subnav">
-                    <Link href="/kings">Our Kings</Link>
-                    <Link href="/queens">Our Queens</Link>
-                    <Link href="/family?filter=retired">Retired & loved</Link>
+                    <Link href="/kings">{locale === "th" ? "พ่อพันธุ์" : "Our Kings"}</Link>
+                    <Link href="/queens">{locale === "th" ? "แม่พันธุ์" : "Our Queens"}</Link>
+                    <Link href="/family?filter=retired">{locale === "th" ? "สมาชิกวัยเกษียณ" : "Retired & loved"}</Link>
                   </div>
                 )}
               </div>
             ))}
             <Link href="/contact" className={`mobile-contact ${pathname === "/contact" ? "active" : ""}`}>
-              Contact Us
+              {locale === "th" ? "ติดต่อเรา" : "Contact Us"}
             </Link>
           </nav>
           <div className="nav-actions">
@@ -117,7 +117,7 @@ export function Navbar() {
               <ChevronDown size={11} />
             </button>
             <Link href="/contact" className={`button small contact-nav ${pathname === "/contact" ? "active" : ""}`}>
-              Let’s talk <ArrowUpRight size={15} />
+              {locale === "th" ? "พูดคุยกับเรา" : "Let’s talk"} <ArrowUpRight size={15} />
             </Link>
             <button
               className="menu-toggle icon-button"
@@ -164,25 +164,25 @@ export function Footer() {
           </div>
         </div>
         <div>
-          <span className="footer-title">OUR LITTLE WORLD</span>
-          <Link href="/family">Meet Our Family</Link>
-          <Link href="/kings">Our Kings</Link>
-          <Link href="/queens">Our Queens</Link>
-          <Link href="/kittens">Available Kittens</Link>
+          <span className="footer-title">{locale === "th" ? "ครอบครัวของเรา" : "OUR LITTLE WORLD"}</span>
+          <Link href="/family">{locale === "th" ? "รู้จักสมาชิก" : "Meet Our Family"}</Link>
+          <Link href="/kings">{locale === "th" ? "พ่อพันธุ์" : "Our Kings"}</Link>
+          <Link href="/queens">{locale === "th" ? "แม่พันธุ์" : "Our Queens"}</Link>
+          <Link href="/kittens">{locale === "th" ? "ลูกแมวหาบ้าน" : "Available Kittens"}</Link>
         </div>
         <div>
-          <span className="footer-title">STAY A LITTLE LONGER</span>
-          <Link href="/alumni">Our Alumni</Link>
-          <Link href="/health">Health & Care</Link>
-          <Link href="/contact">Contact Us</Link>
-          <Link href="/admin">Cattery Admin</Link>
+          <span className="footer-title">{locale === "th" ? "ดูเพิ่มเติม" : "STAY A LITTLE LONGER"}</span>
+          <Link href="/alumni">{locale === "th" ? "สมาชิกที่ย้ายบ้าน" : "Our Alumni"}</Link>
+          <Link href="/health">{locale === "th" ? "สุขภาพและการดูแล" : "Health & Care"}</Link>
+          <Link href="/contact">{locale === "th" ? "ติดต่อเรา" : "Contact Us"}</Link>
+          <Link href="/admin">{locale === "th" ? "จัดการเว็บไซต์" : "Cattery Admin"}</Link>
         </div>
         <div className="footer-note">
           <Heart size={22} strokeWidth={1} />
           <p>
-            Small paws.
+            {locale === "th" ? "อุ้งเท้าเล็ก ๆ" : "Small paws."}
             <br />
-            Beautiful beginnings.
+            {locale === "th" ? "จุดเริ่มต้นที่งดงาม" : "Beautiful beginnings."}
           </p>
           <span>{content.location[locale]}</span>
         </div>
@@ -196,7 +196,7 @@ export function Footer() {
               : "Illustrative photography and sample cat profiles."
             : "Made with a little extra love."}
         </span>
-        <span>WITH LOVE, ALWAYS ♡</span>
+        <span>{locale === "th" ? "ด้วยความรักเสมอ ♡" : "WITH LOVE, ALWAYS ♡"}</span>
       </div>
     </footer>
   );

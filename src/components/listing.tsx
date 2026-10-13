@@ -16,7 +16,13 @@ export function Listing({
   const [search, setSearch] = useState("");
   const kitten = kind === "kittens";
   const alumni = kind === "alumni";
-  const titles = {
+  const titles = locale === "th" ? {
+    family: <>ทำความรู้จัก<em>ครอบครัวของเรา</em></>,
+    kings: <>พ่อพันธุ์<em>ของเรา</em></>,
+    queens: <>แม่พันธุ์<em>ของเรา</em></>,
+    kittens: <>ลูกแมวตัวน้อย<br /><em>รอบ้านที่อบอุ่น</em></>,
+    alumni: <>สมาชิกที่<em>เรารักเสมอ</em></>,
+  } : {
     family: (
       <>
         Meet our <em>family.</em>
@@ -45,7 +51,13 @@ export function Listing({
       </>
     ),
   };
-  const descriptions = {
+  const descriptions = locale === "th" ? {
+    family: "ทุกอุ้งเท้าเล็ก ๆ มีเรื่องราวของตัวเอง",
+    kings: "หัวใจที่อ่อนโยนของบ้านเรา",
+    queens: "ความอ่อนหวานที่เติมเต็มบ้านของเรา",
+    kittens: "เรื่องราวบทใหม่อาจเริ่มต้นจากเสียงครางเบา ๆ",
+    alumni: "เติบโตและเป็นที่รักในบ้านหลังใหม่",
+  } : {
     family: "Every little paw has a beautiful story.",
     kings: "The gentle hearts of our home.",
     queens: "A little grace. A whole lot of love.",
@@ -59,6 +71,7 @@ export function Listing({
       : alumni
         ? []
         : ["All", "Active", "Retired"];
+  const filterTh: Record<string, string> = { All: "ทั้งหมด", Available: "พร้อมย้ายบ้าน", Reserved: "จองแล้ว", "Under Evaluation": "กำลังประเมิน", Sold: "ย้ายบ้านแล้ว", Staying: "อยู่กับเรา", Kings: "พ่อพันธุ์", Queens: "แม่พันธุ์", Retired: "ปลดประจำการ", Active: "ปัจจุบัน" };
   const litter = litters.find((l) => l.id === params.get("litter"));
   let visible = cats
     .filter((c) =>
@@ -98,7 +111,7 @@ export function Listing({
       >
         <Reveal>
           <Eyebrow>
-            {kitten
+            {locale === "th" ? (kitten ? "ความรักเล็ก ๆ รอคุณอยู่" : alumni ? "เป็นครอบครัวของเราเสมอ" : "หัวใจของ Fuwamiro") : kitten
               ? "A LITTLE LOVE IS WAITING"
               : alumni
                 ? "ALWAYS PART OF OUR FAMILY"
@@ -123,7 +136,7 @@ export function Listing({
       <section className="container listing-section">
         {!alumni && (
           <div className="filter-bar">
-            <div className="filter-tabs" role="group" aria-label="Filter cats">
+            <div className="filter-tabs" role="group" aria-label={locale === "th" ? "กรองรายชื่อแมว" : "Filter cats"}>
               {filters.map((f) => (
                 <button
                   key={f}
@@ -132,7 +145,7 @@ export function Listing({
                   }
                   onClick={() => setFilter(f)}
                 >
-                  {f}
+                  {locale === "th" ? filterTh[f] : f}
                   {f === "All" && (
                     <span>
                       {
@@ -159,7 +172,7 @@ export function Listing({
             <label className="search-field">
               <Search size={16} />
               <input
-                aria-label="Search cats"
+                aria-label={locale === "th" ? "ค้นหาแมว" : "Search cats"}
                 placeholder={
                   locale === "th"
                     ? "ค้นหาชื่อหรือสีขน"
@@ -174,7 +187,7 @@ export function Listing({
         {litter && (
           <div className="litter-heading">
             <span>{litter.name}</span>
-            <Link href="/kittens">View all litters ↗</Link>
+            <Link href="/kittens">{locale === "th" ? "ดูลูกแมวทั้งหมด" : "View all litters"} ↗</Link>
           </div>
         )}
         {visible.length === 0 ? (
@@ -197,7 +210,7 @@ export function Listing({
                 setSearch("");
               }}
             >
-              Reset filters
+              {locale === "th" ? "ล้างตัวกรอง" : "Reset filters"}
             </button>
           </div>
         ) : alumni ? (
@@ -209,17 +222,17 @@ export function Listing({
                   className="alumni-story-photo"
                 >
                   <CatPhoto src={c.portrait} alt={`${c.name}, forever loved`} />
-                  <span className="card-label">A NEW CHAPTER</span>
+                  <span className="card-label">{locale === "th" ? "บทใหม่ของชีวิต" : "A NEW CHAPTER"}</span>
                 </Link>
                 <div>
-                  <Eyebrow>FROM OUR HOME TO THEIRS</Eyebrow>
+                  <Eyebrow>{locale === "th" ? "จากบ้านเรา สู่บ้านใหม่" : "FROM OUR HOME TO THEIRS"}</Eyebrow>
                   <h2>
                     {c.name}
-                    {c.nickname && <small>now {c.nickname} ♡</small>}
+                    {c.nickname && <small>{locale === "th" ? "ชื่อใหม่" : "now"} {c.nickname} ♡</small>}
                   </h2>
                   <p>{c.story[locale]}</p>
                   <Link href={`/profile?id=${c.id}`} className="text-link">
-                    Follow the little story <ArrowUpRight size={18} />
+                    {locale === "th" ? "ติดตามเรื่องราวของน้อง" : "Follow the little story"} <ArrowUpRight size={18} />
                   </Link>
                 </div>
               </Reveal>
@@ -235,14 +248,14 @@ export function Listing({
         {alumni && (
           <div className="alumni-update">
             <Heart size={25} />
-            <h3>Still growing. Still connected.</h3>
+            <h3>{locale === "th" ? "เติบโตต่อไป และยังผูกพันกันเสมอ" : "Still growing. Still connected."}</h3>
             <p>
               {locale === "th"
                 ? "เป็นครอบครัวของน้องจาก Fuwamiro? ส่งภาพและเรื่องราวมาให้เราเพิ่มในสมุดความทรงจำของน้องได้เสมอ"
                 : "Part of a Fuwamiro forever family? Share a photo or a little update for your companion’s memory book."}
             </p>
             <Link href="/contact?topic=alumni" className="button outline">
-              Share a little update <ArrowUpRight size={16} />
+              {locale === "th" ? "แบ่งปันเรื่องราวของน้อง" : "Share a little update"} <ArrowUpRight size={16} />
             </Link>
           </div>
         )}

@@ -54,14 +54,14 @@ export function Health() {
     <>
       <section className="page-hero container">
         <Reveal>
-          <Eyebrow>LOVE IS IN THE LITTLE THINGS</Eyebrow>
+          <Eyebrow>{locale === "th" ? "ความรักอยู่ในทุกการดูแล" : "LOVE IS IN THE LITTLE THINGS"}</Eyebrow>
           <h1>
-            Growing
+            {locale === "th" ? "เติบโต" : "Growing"}
             <br />
-            with <em>care.</em>
+            {locale === "th" ? <>ด้วย<em>ความใส่ใจ</em></> : <>with <em>care.</em></>}
           </h1>
           <p className="page-subtitle">
-            A happy life starts with a thoughtful beginning.
+            {locale === "th" ? "ชีวิตที่มีความสุข เริ่มต้นจากการดูแลที่ดี" : "A happy life starts with a thoughtful beginning."}
           </p>
         </Reveal>
         <span className="page-hero-heart">
@@ -77,11 +77,11 @@ export function Health() {
           />
         </Reveal>
         <Reveal>
-          <Eyebrow>OUR PHILOSOPHY</Eyebrow>
+          <Eyebrow>{locale === "th" ? "แนวทางของเรา" : "OUR PHILOSOPHY"}</Eyebrow>
           <h2>
-            Family.
+            {locale === "th" ? "เป็นครอบครัว" : "Family."}
             <br />
-            From the <em>first day.</em>
+            {locale === "th" ? <>ตั้งแต่<em>วันแรก</em></> : <>From the <em>first day.</em></>}
           </h2>
           <p className="lead">{t(content.health)}</p>
           <p>
@@ -96,19 +96,18 @@ export function Health() {
           <Reveal key={c.title} delay={i * 0.06}>
             <c.icon size={28} strokeWidth={1} />
             <span className="care-number">0{i + 1}</span>
-            <h3>{c.title}</h3>
-            <h4>{locale === "th" ? c.th : ""}</h4>
+            <h3>{locale === "th" ? c.th : c.title}</h3>
             <p>{locale === "th" ? c.body : c.en}</p>
           </Reveal>
         ))}
       </section>
       <section className="container section faq-section">
         <div>
-          <Eyebrow>A FEW THINGS TO KNOW</Eyebrow>
+          <Eyebrow>{locale === "th" ? "เรื่องที่ควรรู้" : "A FEW THINGS TO KNOW"}</Eyebrow>
           <h2>
-            A little
+            {locale === "th" ? "อุ่นใจ" : "A little"}
             <br />
-            <em>peace of mind.</em>
+            <em>{locale === "th" ? "ในทุกขั้นตอน" : "peace of mind."}</em>
           </h2>
         </div>
         <div className="faq-list">
@@ -186,13 +185,13 @@ export function Contact() {
     },
     {
       title: "Instagram",
-      label: "Little moments, every day",
+      label: locale === "th" ? "เรื่องราวเล็ก ๆ ในทุกวัน" : "Little moments, every day",
       url: content.instagram_url,
       icon: Instagram,
     },
     {
       title: "Facebook",
-      label: "Stories from our little home",
+      label: locale === "th" ? "เรื่องราวจากบ้านหลังเล็กของเรา" : "Stories from our little home",
       url: content.facebook_url,
       icon: Facebook,
     },
@@ -209,11 +208,11 @@ export function Contact() {
     <>
       <section className="page-hero container">
         <Reveal>
-          <Eyebrow>EVERY BEAUTIFUL STORY STARTS WITH HELLO</Eyebrow>
+          <Eyebrow>{locale === "th" ? "ทุกเรื่องราวเริ่มจากการทักทาย" : "EVERY BEAUTIFUL STORY STARTS WITH HELLO"}</Eyebrow>
           <h1>
-            Let’s talk
+            {locale === "th" ? "มาคุยกัน" : "Let’s talk"}
             <br />
-            <em>little paws.</em>
+            <em>{locale === "th" ? "เรื่องน้องแมว" : "little paws."}</em>
           </h1>
           <p>
             {locale === "th"
@@ -228,7 +227,7 @@ export function Contact() {
       <section className="container contact-layout">
         <Reveal>
           <h2>
-            A little <em>hello.</em>
+            {locale === "th" ? <>เริ่มต้น<em>ทักทาย</em></> : <>A little <em>hello.</em></>}
           </h2>
           <p>
             {locale === "th"
@@ -262,7 +261,7 @@ export function Contact() {
                         : "Contact details coming soon"}
                     </small>
                   </span>
-                  <span className="coming-soon">Soon</span>
+                  <span className="coming-soon">{locale === "th" ? "เร็ว ๆ นี้" : "Soon"}</span>
                 </div>
               ),
             )}
@@ -287,7 +286,7 @@ export function Contact() {
           </div>
         </Reveal>
         <Reveal className="contact-form-wrap">
-          <Eyebrow>A NOTE TO OUR LITTLE HOME</Eyebrow>
+          <Eyebrow>{locale === "th" ? "ฝากข้อความถึงบ้านของเรา" : "A NOTE TO OUR LITTLE HOME"}</Eyebrow>
           <h3>
             {locale === "th"
               ? "บอกเราเกี่ยวกับคุณ"
@@ -299,7 +298,7 @@ export function Contact() {
               e.preventDefault();
               setCopied(false);
               setDraft(
-                `Hello Fuwamiro,\n\nName: ${name}\nEmail: ${email}\nTopic: ${topic}\n\n${message}\n\nWith love,\n${name}`,
+                locale === "th" ? `สวัสดี Fuwamiro\n\nชื่อ: ${name}\nอีเมล: ${email}\nเรื่อง: ${topic}\n\n${message}\n\nจาก ${name}` : `Hello Fuwamiro,\n\nName: ${name}\nEmail: ${email}\nTopic: ${topic}\n\n${message}\n\nWith love,\n${name}`,
               );
             }}
           >
@@ -309,7 +308,7 @@ export function Contact() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Your lovely name"
+                placeholder={locale === "th" ? "ชื่อของคุณ" : "Your lovely name"}
                 autoComplete="name"
               />
             </label>
@@ -327,11 +326,11 @@ export function Contact() {
             <label>
               {locale === "th" ? "อยากคุยเรื่องอะไร" : "What’s on your mind?"}
               <select value={topic} onChange={(e) => setTopic(e.target.value)}>
-                {cat && <option>About {cat.name}</option>}
-                <option>Meet a kitten</option>
-                <option>About our cattery</option>
-                <option>Alumni update</option>
-                <option>Something else</option>
+                {cat && <option value={`About ${cat.name}`}>{locale === "th" ? `สอบถามเรื่อง ${cat.name}` : `About ${cat.name}`}</option>}
+                <option value="Meet a kitten">{locale === "th" ? "ทำความรู้จักลูกแมว" : "Meet a kitten"}</option>
+                <option value="About our cattery">{locale === "th" ? "เกี่ยวกับฟาร์มของเรา" : "About our cattery"}</option>
+                <option value="Alumni update">{locale === "th" ? "อัปเดตสมาชิกบ้านใหม่" : "Alumni update"}</option>
+                <option value="Something else">{locale === "th" ? "เรื่องอื่น ๆ" : "Something else"}</option>
               </select>
             </label>
             <label>
@@ -369,12 +368,12 @@ export function Contact() {
                 value={draft}
                 readOnly
                 rows={7}
-                aria-label="Prepared message"
+                aria-label={locale === "th" ? "ข้อความที่เตรียมไว้" : "Prepared message"}
               />
               <div className="draft-actions">
                 <button className="button outline small" onClick={copy}>
                   {copied ? <Check size={15} /> : <Copy size={15} />}{" "}
-                  {copied ? "Copied" : "Copy message"}
+                  {locale === "th" ? (copied ? "คัดลอกแล้ว" : "คัดลอกข้อความ") : (copied ? "Copied" : "Copy message")}
                 </button>
                 {content.line_url && (
                   <a
@@ -383,7 +382,7 @@ export function Contact() {
                     rel="noopener noreferrer"
                     className="button small"
                   >
-                    Open LINE ↗
+                    {locale === "th" ? "เปิด LINE" : "Open LINE"} ↗
                   </a>
                 )}
                 {content.email && (
@@ -391,7 +390,7 @@ export function Contact() {
                     className="text-link"
                     href={`mailto:${content.email}?subject=${encodeURIComponent(topic)}&body=${encodeURIComponent(draft)}`}
                   >
-                    Open email ↗
+                    {locale === "th" ? "เปิดอีเมล" : "Open email"} ↗
                   </a>
                 )}
               </div>
