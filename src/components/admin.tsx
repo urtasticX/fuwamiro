@@ -39,6 +39,14 @@ import { useSite } from "./providers";
 import { Eyebrow } from "./ui";
 import { ImageCropper, imageSize, type CropSize } from "./image-cropper";
 type Data = Awaited<ReturnType<typeof loadAdminData>>;
+type Kind = "cat" | "litter" | "event" | "health" | "content";
+const tabKind: Partial<Record<Tab, Kind>> = {
+  cats: "cat",
+  litters: "litter",
+  timeline: "event",
+  health: "health",
+  content: "content",
+};
 type Tab = "overview" | "cats" | "litters" | "timeline" | "health" | "content";
 const tabs: [Tab, string][] = [
   ["overview", "ภาพรวม"],
@@ -255,10 +263,74 @@ export function Admin() {
   const [health, setHealth] = useState<PrivateHealth | null>(null);
   const [content, setContent] = useState(defaultContent);
   const [search, setSearch] = useState("");
+  // JSON snapshot of each editor when it was opened or last saved, to detect unsaved edits.
+  const baseline = useRef<Partial<Record<Kind, string>>>({});
+  const editing: Record<Kind, unknown> = {
+    cat,
+    litter,
+    event,
+    health,
+    content,
+  };
+  const setters = {
+    cat: setCat,
+    litter: setLitter,
+    event: setEvent,
+    health: setHealth,
+    content: setContent,
+  } as unknown as Record<Kind, (v: unknown) => void>;
+  const isDirty = (k: Kind) =>
+    editing[k] != null && JSON.stringify(editing[k]) !== baseline.current[k];
+  const anyDirty = (Object.keys(editing) as Kind[]).some(isDirty);
+  const currentKind = tabKind[tab];
+  const currentDirty = currentKind ? isDirty(currentKind) : false;
+  const matches = (...text: (string | undefined)[]) =>
+    text.some((t) => t?.toLowerCase().includes(search.trim().toLowerCase()));
+  function confirmDiscard(kinds: Kind[]) {
+    return (
+      !kinds.some(isDirty) ||
+      window.confirm(
+        "มีการแก้ไขที่ยังไม่ได้บันทึก ต้องการทิ้งการแก้ไขนี้ใช่ไหม?",
+      )
+    );
+  }
+  function open<T>(kind: Kind, value: T) {
+    if (!confirmDiscard([kind])) return;
+    baseline.current[kind] = JSON.stringify(value);
+    setters[kind](value);
+    setError("");
+    setNotice("");
+    // On phones the editor sits below the list, so bring it into view.
+    if (window.matchMedia("(max-width: 700px)").matches)
+      requestAnimationFrame(() =>
+        document
+          .querySelector(".admin-editor")
+          ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+      );
+  }
+  function revert(kind: Kind) {
+    const saved = baseline.current[kind];
+    if (saved) setters[kind](JSON.parse(saved));
+  }
+  useEffect(() => {
+    if (!anyDirty) return;
+    const warn = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [anyDirty]);
+  useEffect(() => {
+    if (!notice) return;
+    const timer = setTimeout(() => setNotice(""), 4000);
+    return () => clearTimeout(timer);
+  }, [notice]);
   async function reload() {
     const next = await loadAdminData();
     setData(next);
-    setContent(next.content);
+    // Keep unsaved site-content edits when another section saves and reloads.
+    if (baseline.current.content === undefined || !isDirty("content")) {
+      setContent(next.content);
+      baseline.current.content = JSON.stringify(next.content);
+    }
     setLoaded(true);
     await refresh();
   }
@@ -281,6 +353,7 @@ export function Admin() {
           content: defaultContent,
         });
         setContent(defaultContent);
+        baseline.current = {};
         if (next) {
           try {
             const token = await next.getIdTokenResult(true);
@@ -316,10 +389,12 @@ export function Admin() {
       setBusy(false);
     }
   }
-  async function save(e: FormEvent, fn: () => Promise<void>) {
+  async function save(e: FormEvent, kind: Kind, fn: () => Promise<void>) {
     e.preventDefault();
+    const saved = JSON.stringify(editing[kind]);
     await action(async () => {
       await fn();
+      baseline.current[kind] = saved;
       await reload();
     });
   }
@@ -337,6 +412,38 @@ export function Admin() {
         </div>
       )}
     </>
+  );
+  // Floating feedback so it stays visible after saving at the bottom of a long form.
+  const toasts = (
+    <div className="admin-toasts" aria-live="polite">
+      {error && (
+        <div className="admin-alert error" role="alert">
+          <span>{error}</span>
+          <button
+            type="button"
+            aria-label="ปิดข้อความ"
+            onClick={() => setError("")}
+          >
+            ×
+          </button>
+        </div>
+      )}
+      {notice && (
+        <div className="admin-alert" role="status">
+          <Check size={16} />
+          {notice}
+        </div>
+      )}
+    </div>
+  );
+  const searchBox = (placeholder: string) => (
+    <input
+      type="search"
+      aria-label={placeholder}
+      placeholder={placeholder}
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+    />
   );
   if (checking)
     return (
@@ -444,10 +551,25 @@ export function Admin() {
     </select>
   );
   const saveButton = (
-    <button className="button" disabled={busy || !loaded}>
-      <Save size={16} />
-      {busy ? "กำลังบันทึก…" : "บันทึกการเปลี่ยนแปลง"}
-    </button>
+    <span className="admin-save-group">
+      <button className="button" disabled={busy || !loaded}>
+        <Save size={16} />
+        {busy ? "กำลังบันทึก…" : "บันทึกการเปลี่ยนแปลง"}
+      </button>
+      {currentDirty && currentKind && (
+        <>
+          <span className="unsaved-hint">ยังไม่ได้บันทึก</span>
+          <button
+            type="button"
+            className="admin-revert"
+            disabled={busy}
+            onClick={() => revert(currentKind)}
+          >
+            ยกเลิกการแก้ไข
+          </button>
+        </>
+      )}
+    </span>
   );
   return (
     <section className="container admin-page">
@@ -470,7 +592,10 @@ export function Admin() {
           </button>
           <button
             className="button outline small"
-            onClick={() => signOut(getFirebaseAuth())}
+            onClick={() => {
+              if (confirmDiscard(Object.keys(editing) as Kind[]))
+                void signOut(getFirebaseAuth());
+            }}
           >
             <LogOut size={14} />
             ออกจากระบบ
@@ -483,16 +608,20 @@ export function Admin() {
             key={id}
             onClick={() => {
               setTab(id);
+              setSearch("");
               setError("");
               setNotice("");
             }}
             className={tab === id ? "selected" : ""}
           >
             {label}
+            {tabKind[id] && isDirty(tabKind[id]) && (
+              <span className="unsaved-dot" title="ยังไม่ได้บันทึก" />
+            )}
           </button>
         ))}
       </nav>
-      {alert}
+      {toasts}
       {!loaded ? (
         <div className="empty-state">
           <h3>ยังโหลดข้อมูลไม่สำเร็จ</h3>
@@ -535,7 +664,7 @@ export function Admin() {
                   className="button"
                   onClick={() => {
                     setTab("cats");
-                    setCat(newCat());
+                    open("cat", newCat());
                   }}
                 >
                   <Plus size={16} />
@@ -571,26 +700,19 @@ export function Admin() {
                   <button
                     className="icon-button"
                     aria-label="เพิ่มแมว"
-                    onClick={() => setCat(newCat())}
+                    onClick={() => open("cat", newCat())}
                   >
                     <Plus size={20} />
                   </button>
                 </div>
-                <input
-                  aria-label="ค้นหาแมวในหลังบ้าน"
-                  placeholder="ค้นหาชื่อแมว…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
+                {searchBox("ค้นหาชื่อแมว…")}
                 {data.cats
-                  .filter((c) =>
-                    c.name.toLowerCase().includes(search.toLowerCase()),
-                  )
+                  .filter((c) => matches(c.name, c.nickname))
                   .map((c) => (
                     <button
                       key={c.id}
                       className={`admin-record ${cat?.id === c.id ? "selected" : ""}`}
-                      onClick={() => setCat(structuredClone(c))}
+                      onClick={() => open("cat", structuredClone(c))}
                     >
                       <img src={c.portrait} alt="" />
                       <span>
@@ -606,7 +728,7 @@ export function Admin() {
                 <form
                   className="admin-editor"
                   onSubmit={(e) =>
-                    save(e, async () => {
+                    save(e, "cat", async () => {
                       validateCat(cat, data.cats, data.litters);
                       await saveRecord("cats", cat);
                     })
@@ -895,7 +1017,7 @@ export function Admin() {
                     className="icon-button"
                     aria-label="Add litter"
                     onClick={() =>
-                      setLitter({
+                      open("litter", {
                         id: crypto.randomUUID(),
                         name: "",
                         father_id: "",
@@ -907,18 +1029,19 @@ export function Admin() {
                     <Plus />
                   </button>
                 </div>
-                {data.litters.map((l) => (
+                {searchBox("ค้นหาครอก…")}
+                {data.litters.filter((l) => matches(l.name)).map((l) => (
                   <button
                     key={l.id}
-                    className="admin-record"
-                    onClick={() => setLitter({ ...l })}
+                    className={`admin-record ${litter?.id === l.id ? "selected" : ""}`}
+                    onClick={() => open("litter", { ...l })}
                   >
                     <span>
                       <strong>{l.name}</strong>
                       <small>
                         {l.birthday} ·{" "}
                         {data.cats.filter((c) => c.litter_id === l.id).length}{" "}
-                        kittens
+                        ตัว
                       </small>
                     </span>
                   </button>
@@ -928,7 +1051,7 @@ export function Admin() {
                 <form
                   className="admin-editor"
                   onSubmit={(e) =>
-                    save(e, async () => {
+                    save(e, "litter", async () => {
                       if (
                         !litter.father_id ||
                         !litter.mother_id ||
@@ -1019,22 +1142,24 @@ export function Admin() {
                   </p>
                   <div className="admin-form-actions">
                     {saveButton}
-                    <button
-                      type="button"
-                      className="danger-button"
-                      disabled={busy}
-                      onClick={() => {
-                        if (window.confirm("ลบครอกนี้?"))
-                          void action(async () => {
-                            await removeRecord("litters", litter.id, data);
-                            setLitter(null);
-                            await reload();
-                          }, "ลบครอกแล้ว");
-                      }}
-                    >
-                      <Trash2 size={15} />
-                      ลบครอก
-                    </button>
+                    {data.litters.some((l) => l.id === litter.id) && (
+                      <button
+                        type="button"
+                        className="danger-button"
+                        disabled={busy}
+                        onClick={() => {
+                          if (window.confirm("ลบครอกนี้?"))
+                            void action(async () => {
+                              await removeRecord("litters", litter.id, data);
+                              setLitter(null);
+                              await reload();
+                            }, "ลบครอกแล้ว");
+                        }}
+                      >
+                        <Trash2 size={15} />
+                        ลบครอก
+                      </button>
+                    )}
                   </div>
                 </form>
               ) : (
@@ -1053,7 +1178,7 @@ export function Admin() {
                     className="icon-button"
                     aria-label="Add timeline event"
                     onClick={() =>
-                      setEvent({
+                      open("event", {
                         id: crypto.randomUUID(),
                         cat_id: data.cats[0]?.id || "",
                         date: new Date().toISOString().slice(0, 10),
@@ -1067,16 +1192,24 @@ export function Admin() {
                     <Plus />
                   </button>
                 </div>
+                {searchBox("ค้นหาเรื่องราวหรือชื่อแมว…")}
                 {[...data.events]
+                  .filter((ev) =>
+                    matches(
+                      ev.title.th,
+                      ev.title.en,
+                      data.cats.find((c) => c.id === ev.cat_id)?.name,
+                    ),
+                  )
                   .sort((a, b) => b.date.localeCompare(a.date))
                   .map((ev) => (
                     <button
                       key={ev.id}
-                      className="admin-record"
-                      onClick={() => setEvent(structuredClone(ev))}
+                      className={`admin-record ${event?.id === ev.id ? "selected" : ""}`}
+                      onClick={() => open("event", structuredClone(ev))}
                     >
                       <span>
-                        <strong>{ev.title.en || ev.title.th}</strong>
+                        <strong>{ev.title.th || ev.title.en}</strong>
                         <small>
                           {data.cats.find((c) => c.id === ev.cat_id)?.name} ·{" "}
                           {ev.date}
@@ -1089,7 +1222,7 @@ export function Admin() {
                 <form
                   className="admin-editor"
                   onSubmit={(e) =>
-                    save(e, async () => {
+                    save(e, "event", async () => {
                       if (
                         !data.cats.some((c) => c.id === event.cat_id) ||
                         !event.date ||
@@ -1195,26 +1328,28 @@ export function Admin() {
                   </p>
                   <div className="admin-form-actions">
                     {saveButton}
-                    <button
-                      type="button"
-                      className="danger-button"
-                      disabled={busy}
-                      onClick={() => {
-                        if (window.confirm("ลบความทรงจำนี้?"))
-                          void action(async () => {
-                            await removeRecord(
-                              "timeline_events",
-                              event.id,
-                              data,
-                            );
-                            setEvent(null);
-                            await reload();
-                          }, "ลบเหตุการณ์แล้ว");
-                      }}
-                    >
-                      <Trash2 size={15} />
-                      ลบเหตุการณ์
-                    </button>
+                    {data.events.some((ev) => ev.id === event.id) && (
+                      <button
+                        type="button"
+                        className="danger-button"
+                        disabled={busy}
+                        onClick={() => {
+                          if (window.confirm("ลบความทรงจำนี้?"))
+                            void action(async () => {
+                              await removeRecord(
+                                "timeline_events",
+                                event.id,
+                                data,
+                              );
+                              setEvent(null);
+                              await reload();
+                            }, "ลบเหตุการณ์แล้ว");
+                        }}
+                      >
+                        <Trash2 size={15} />
+                        ลบเหตุการณ์
+                      </button>
+                    )}
                   </div>
                 </form>
               ) : (
@@ -1228,12 +1363,14 @@ export function Admin() {
             <div className="admin-split">
               <aside className="admin-records">
                 <h3>ข้อมูลส่วนตัว</h3>
-                {data.cats.map((c) => (
+                {searchBox("ค้นหาชื่อแมว…")}
+                {data.cats.filter((c) => matches(c.name, c.nickname)).map((c) => (
                   <button
                     key={c.id}
-                    className="admin-record"
+                    className={`admin-record ${health?.id === c.id ? "selected" : ""}`}
                     onClick={() =>
-                      setHealth(
+                      open(
+                        "health",
                         structuredClone(
                           data.health.find((h) => h.id === c.id) || {
                             id: c.id,
@@ -1245,6 +1382,7 @@ export function Admin() {
                       )
                     }
                   >
+                    <img src={c.portrait} alt="" />
                     <span>
                       <strong>{c.name}</strong>
                       <small>
@@ -1260,7 +1398,7 @@ export function Admin() {
                 <form
                   className="admin-editor"
                   onSubmit={(e) =>
-                    save(e, () =>
+                    save(e, "health", () =>
                       saveRecord("private_health", {
                         ...health,
                         updated_at: new Date().toISOString(),
@@ -1357,7 +1495,7 @@ export function Admin() {
           {tab === "content" && (
             <form
               className="admin-editor content-editor"
-              onSubmit={(e) => save(e, () => saveContent(content))}
+              onSubmit={(e) => save(e, "content", () => saveContent(content))}
             >
               <h2>เนื้อหาบนเว็บไซต์</h2>
               <fieldset>
@@ -1431,7 +1569,7 @@ export function Admin() {
                   </Field>
                 ))}
               </div>
-              {saveButton}
+              <div className="admin-form-actions">{saveButton}</div>
             </form>
           )}
         </>

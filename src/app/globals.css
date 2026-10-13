@@ -3392,3 +3392,66 @@ label select:focus {
 body {
   overflow-x: clip;
 }
+/* Back office: keep save actions and feedback within reach on long forms. */
+.admin-form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding: 14px 0;
+  background: #fcfeff;
+  border-top: 1px solid var(--line);
+}
+.admin-save-group {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.unsaved-hint {
+  font-size: 11px;
+  color: #c08a3e;
+}
+.admin-revert {
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: underline;
+}
+.unsaved-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: #e0a650;
+  vertical-align: middle;
+}
+.admin-toasts {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 50;
+  display: grid;
+  gap: 10px;
+  width: min(380px, calc(100vw - 32px));
+}
+.admin-toasts .admin-alert {
+  margin: 0;
+  box-shadow: 0 8px 24px rgba(52, 73, 94, 0.12);
+}
+.admin-toasts .admin-alert.error {
+  justify-content: space-between;
+}
+.admin-toasts .admin-alert button {
+  font-size: 18px;
+  line-height: 1;
+  color: inherit;
+}
+.admin-records > input[type="search"] {
+  margin-bottom: 12px;
+}
+@media (max-width: 700px) {
+  .admin-toasts {
+    top: 16px;
+    right: 16px;
+  }
+}
