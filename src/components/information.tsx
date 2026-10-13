@@ -56,9 +56,9 @@ export function Health() {
         <Reveal>
           <Eyebrow>{locale === "th" ? "ความรักอยู่ในทุกการดูแล" : "LOVE IS IN THE LITTLE THINGS"}</Eyebrow>
           <h1>
-            {locale === "th" ? "เติบโต" : "Growing"}
+            Growing
             <br />
-            {locale === "th" ? <>ด้วย<em>ความใส่ใจ</em></> : <>with <em>care.</em></>}
+            with <em>care.</em>
           </h1>
           <p className="page-subtitle">
             {locale === "th" ? "ชีวิตที่มีความสุข เริ่มต้นจากการดูแลที่ดี" : "A happy life starts with a thoughtful beginning."}

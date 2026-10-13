@@ -16,28 +16,14 @@ export function Listing({
   const [search, setSearch] = useState("");
   const kitten = kind === "kittens";
   const alumni = kind === "alumni";
-  const titles = locale === "th" ? {
-    family: <>ทำความรู้จัก<em>ครอบครัวของเรา</em></>,
-    kings: <>พ่อพันธุ์<em>ของเรา</em></>,
-    queens: <>แม่พันธุ์<em>ของเรา</em></>,
-    kittens: <>ลูกแมวตัวน้อย<br /><em>รอบ้านที่อบอุ่น</em></>,
-    alumni: <>สมาชิกที่<em>เรารักเสมอ</em></>,
-  } : {
+  const titles = {
     family: (
       <>
         Meet our <em>family.</em>
       </>
     ),
-    kings: (
-      <>
-        Our gentle <em>kings.</em>
-      </>
-    ),
-    queens: (
-      <>
-        Our lovely <em>queens.</em>
-      </>
-    ),
+    kings: locale === "th" ? <>พ่อพันธุ์<em>ของเรา</em></> : <>Our gentle <em>kings.</em></>,
+    queens: locale === "th" ? <>แม่พันธุ์<em>ของเรา</em></> : <>Our lovely <em>queens.</em></>,
     kittens: (
       <>
         Little paws.
