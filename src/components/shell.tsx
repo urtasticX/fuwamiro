@@ -58,6 +58,7 @@ const links = [
 ] as const;
 export function Navbar() {
   const pathname = usePathname();
+  const activePath = pathname.replace(/\/+$/, "") || "/";
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { locale, setLocale } = useSite();
@@ -90,7 +91,7 @@ export function Navbar() {
           >
             {links.map(([href, th, en]) => (
               <div className="nav-item" key={href}>
-                <Link className={pathname === href || (href === "/family" && ["/kings", "/queens"].includes(pathname)) ? "active" : ""} href={href}>
+                <Link className={activePath === href || (href === "/family" && ["/kings", "/queens"].includes(activePath)) ? "active" : ""} href={href}>
                   {locale === "th" ? th : en}
                   {href === "/family" && <ChevronDown size={12} />}
                 </Link>
@@ -103,7 +104,7 @@ export function Navbar() {
                 )}
               </div>
             ))}
-            <Link href="/contact" className={`mobile-contact ${pathname === "/contact" ? "active" : ""}`}>
+            <Link href="/contact" className={`mobile-contact ${activePath === "/contact" ? "active" : ""}`}>
               {locale === "th" ? "ติดต่อเรา" : "Contact Us"}
             </Link>
           </nav>
@@ -116,7 +117,7 @@ export function Navbar() {
               {locale.toUpperCase()}
               <ChevronDown size={11} />
             </button>
-            <Link href="/contact" className={`button small contact-nav ${pathname === "/contact" ? "active" : ""}`}>
+            <Link href="/contact" className={`button small contact-nav ${activePath === "/contact" ? "active" : ""}`}>
               {locale === "th" ? "พูดคุยกับเรา" : "Let’s talk"} <ArrowUpRight size={15} />
             </Link>
             <button
