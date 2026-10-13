@@ -84,6 +84,7 @@ test("Media upload checks role, file type and private record access", async () =
   const admin = env
     .authenticatedContext("claim-admin", { admin: true })
     .storage();
+  const documentAdmin = env.authenticatedContext("approved-admin").storage();
   await assertFails(
     uploadBytes(ref(visitor, "public/cat.webp"), new Uint8Array([1, 2, 3]), {
       contentType: "image/webp",
@@ -92,6 +93,11 @@ test("Media upload checks role, file type and private record access", async () =
   await assertSucceeds(
     uploadBytes(ref(admin, "public/cat.webp"), new Uint8Array([1, 2, 3]), {
       contentType: "image/webp",
+    }),
+  );
+  await assertSucceeds(
+    uploadBytes(ref(documentAdmin, "public/cat-by-approved-admin.png"), new Uint8Array([1, 2, 3]), {
+      contentType: "image/png",
     }),
   );
   await assertFails(

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, FormEvent, ReactNode } from "react";
+import { useEffect, useRef, useState, FormEvent, ReactNode } from "react";
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -37,6 +37,7 @@ import { Cat, Copy, JourneyEvent, Litter, SiteContent } from "@/lib/types";
 import { defaultContent } from "@/lib/data";
 import { useSite } from "./providers";
 import { Eyebrow } from "./ui";
+import { ImageCropper, imageSize, type CropSize } from "./image-cropper";
 type Data = Awaited<ReturnType<typeof loadAdminData>>;
 type Tab = "overview" | "cats" | "litters" | "timeline" | "health" | "content";
 const tabs: [Tab, string][] = [
@@ -119,14 +120,26 @@ function MediaEditor({
   onError,
   hint,
   multiple = true,
+  cropSize,
 }: {
   value: string[];
   onChange: (v: string[]) => void;
   onError: (s: string) => void;
   hint: string;
   multiple?: boolean;
+  cropSize?: CropSize;
 }) {
   const [busy, setBusy] = useState(false);
+  const [localError, setLocalError] = useState("");
+  const [uploaded, setUploaded] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const cropPromise = useRef<{ resolve: (file: File) => void; reject: () => void } | null>(null);
+  function requestCrop(file: File) {
+    return new Promise<File>((resolve, reject) => {
+      cropPromise.current = { resolve, reject: () => reject(new DOMException("Crop cancelled", "AbortError")) };
+      setCropFile(file);
+    });
+  }
   return (
     <div className="media-editor">
       <div className="admin-media-grid">
@@ -152,25 +165,52 @@ function MediaEditor({
         {busy ? "กำลังอัปโหลด…" : "เพิ่มรูปภาพ"}
         <input
           type="file"
-          hidden
+          className="upload-input"
           accept="image/jpeg,image/png,image/webp,image/avif"
-        multiple={multiple}
+          multiple={multiple}
           disabled={busy}
           onChange={async (e) => {
             if (!e.target.files) return;
+            const files = Array.from(e.target.files);
+            e.target.value = "";
+            setLocalError("");
+            onError("");
+            setUploaded(false);
             setBusy(true);
             try {
-              onChange([...value, ...(await uploadMedia(e.target.files))]);
+              const urls = [...value];
+              for (const file of files) {
+                const dimensions = await imageSize(file);
+                const needsCrop = cropSize && (
+                  Math.abs(dimensions.width / dimensions.height - cropSize.width / cropSize.height) > 0.01 ||
+                  dimensions.width < cropSize.width || dimensions.height < cropSize.height
+                );
+                const prepared = needsCrop ? await requestCrop(file) : file;
+                urls.push(...await uploadMedia([prepared]));
+                onChange([...urls]);
+              }
+              setUploaded(urls.length > value.length);
             } catch (error) {
-              onError(message(error));
+              if (!(error instanceof DOMException && error.name === "AbortError")) {
+                setLocalError(message(error));
+                onError(message(error));
+              }
             } finally {
               setBusy(false);
-              e.target.value = "";
             }
           }}
         />
       </label>
       <small className="upload-hint">{hint} · JPG, PNG, WebP หรือ AVIF · ไม่เกิน 20 MB ต่อไฟล์</small>
+      {busy && <p className="upload-feedback" role="status">{cropFile ? "กำลังครอปรูป…" : "กำลังอัปโหลดรูป กรุณารอสักครู่…"}</p>}
+      {uploaded && !busy && <p className="upload-feedback success" role="status">อัปโหลดแล้ว กดบันทึกการเปลี่ยนแปลงเพื่อเผยแพร่</p>}
+      {localError && <p className="upload-feedback error" role="alert">{localError}</p>}
+      {cropFile && cropSize && <ImageCropper
+        file={cropFile}
+        size={cropSize}
+        onConfirm={(file) => { cropPromise.current?.resolve(file); cropPromise.current = null; setCropFile(null); }}
+        onCancel={() => { cropPromise.current?.reject(); cropPromise.current = null; setCropFile(null); }}
+      />}
     </div>
   );
 }
@@ -788,6 +828,7 @@ export function Admin() {
                       onError={setError}
                       hint="ขนาดแนะนำ 1200 × 1500 พิกเซล (แนวตั้ง 4:5)"
                       multiple={false}
+                      cropSize={{ width: 1200, height: 1500 }}
                     />
                   </fieldset>
                   <fieldset>
@@ -797,6 +838,7 @@ export function Admin() {
                       onChange={(v) => setCat({ ...cat, photos: v })}
                       onError={setError}
                       hint="ขนาดแนะนำ 1600 × 1200 พิกเซล (แนวนอน 4:3)"
+                      cropSize={{ width: 1600, height: 1200 }}
                     />
                   </fieldset>
                   <CopyFields
@@ -1110,6 +1152,7 @@ export function Admin() {
                       onChange={(v) => setEvent({ ...event, photos: v })}
                       onError={setError}
                       hint="ขนาดแนะนำ 1600 × 1200 พิกเซล (แนวนอน 4:3)"
+                      cropSize={{ width: 1600, height: 1200 }}
                     />
                   </fieldset>
                   <Field label="ลิงก์วิดีโอ MP4 / WebM (ไม่บังคับ)">
@@ -1325,6 +1368,7 @@ export function Admin() {
                   onError={setError}
                   hint="ขนาดแนะนำ 512 × 512 พิกเซล (สี่เหลี่ยมจัตุรัส) ใช้เป็นโลโก้และไอคอนแท็บ"
                   multiple={false}
+                  cropSize={{ width: 512, height: 512 }}
                 />
               </fieldset>
               <label className="admin-checkbox">
