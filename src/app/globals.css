@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500&family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Sans+Thai:wght@400;450;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400;1,500&family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Sans+Thai:wght@400;450;500;600&family=Kanit:wght@400;500&display=swap");
 @import "tailwindcss";
 :root {
   --ink: #34495e;
@@ -601,6 +601,11 @@ svg {
 .story-copy > p:not(.lead) {
   font-size: 12px;
   line-height: 2;
+}
+html[lang="th"] .hero-subtitle,
+html[lang="th"] .hero-thai,
+html[lang="th"] .story-copy > p {
+  font-family: "Kanit", sans-serif;
 }
 .story-copy .text-link {
   margin-top: 12px;

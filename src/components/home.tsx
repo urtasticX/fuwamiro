@@ -54,7 +54,9 @@ export function Home() {
           </motion.h1>
           <Reveal delay={0.22}>
             <p className="hero-subtitle">
-              Every little paw has a story to tell.
+              {locale === "th"
+                ? "ทุกอุ้งเท้าเล็ก ๆ มีเรื่องราวของตัวเอง"
+                : "Every little paw has a story to tell."}
             </p>
             <p className="hero-thai">
               {locale === "th"
