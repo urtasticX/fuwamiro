@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Listing } from "@/components/listing";
-export const metadata = { title: "Our Alumni" };
+export const metadata = { title: "สมาชิกที่ย้ายบ้าน" };
 export default function Page() {
   return (
     <Suspense>

@@ -48,6 +48,8 @@ const tabs: [Tab, string][] = [
   ["content", "เนื้อหา & ติดต่อ"],
 ];
 const copy = (): Copy => ({ th: "", en: "" });
+const stageLabel: Record<string, string> = { kitten: "ลูกแมว", breeding: "พ่อพันธุ์/แม่พันธุ์", retired: "วัยเกษียณ", alumni: "ย้ายบ้านแล้ว" };
+const availabilityLabel: Record<string, string> = { Available: "พร้อมย้ายบ้าน", Reserved: "มีคนจองแล้ว", "Under Evaluation": "กำลังประเมิน", Sold: "ย้ายบ้านแล้ว", Staying: "อยู่กับเรา" };
 function newCat(): Cat {
   return {
     id: crypto.randomUUID(),
@@ -65,6 +67,7 @@ function newCat(): Cat {
     story: copy(),
     public_health: copy(),
     pedigree: "",
+    pedigree_type: "",
     father_id: null,
     mother_id: null,
     litter_id: null,
@@ -100,13 +103,6 @@ function CopyFields({
           onChange={(e) => onChange({ ...value, th: e.target.value })}
         />
       </Field>
-      <Field label="English">
-        <textarea
-          rows={3}
-          value={value.en}
-          onChange={(e) => onChange({ ...value, en: e.target.value })}
-        />
-      </Field>
     </fieldset>
   );
 }
@@ -114,10 +110,14 @@ function MediaEditor({
   value,
   onChange,
   onError,
+  hint,
+  multiple = true,
 }: {
   value: string[];
   onChange: (v: string[]) => void;
   onError: (s: string) => void;
+  hint: string;
+  multiple?: boolean;
 }) {
   const [busy, setBusy] = useState(false);
   return (
@@ -126,7 +126,7 @@ function MediaEditor({
         {value.map((url, i) => (
           <div key={`${url}-${i}`}>
             {/\.(mp4|webm)(\?|$)/i.test(url) ? (
-              <span>Video</span>
+              <span>วิดีโอ</span>
             ) : (
               <img src={url} alt={`Photo ${i + 1}`} />
             )}
@@ -147,7 +147,7 @@ function MediaEditor({
           type="file"
           hidden
           accept="image/jpeg,image/png,image/webp,image/avif"
-          multiple
+        multiple={multiple}
           disabled={busy}
           onChange={async (e) => {
             if (!e.target.files) return;
@@ -163,6 +163,7 @@ function MediaEditor({
           }}
         />
       </label>
+      <small className="upload-hint">{hint} · JPG, PNG, WebP หรือ AVIF · ไม่เกิน 20 MB ต่อไฟล์</small>
     </div>
   );
 }
@@ -303,9 +304,9 @@ export function Admin() {
           <span className="admin-lock">
             <LockKeyhole size={25} />
           </span>
-          <Eyebrow>THE CARE BEHIND OUR LITTLE HOME</Eyebrow>
+          <Eyebrow>พื้นที่ดูแลบ้านเล็ก ๆ ของเรา</Eyebrow>
           <h1>
-            Cattery <em>Admin.</em>
+            <em>จัดการเว็บไซต์</em>
           </h1>
           <p>เข้าสู่ระบบด้วยบัญชีผู้ดูแล Fuwamiro</p>
           {alert}
@@ -405,9 +406,9 @@ export function Admin() {
     <section className="container admin-page">
       <div className="admin-heading">
         <div>
-          <Eyebrow>FUWAMIRO · PRIVATE WORKSPACE</Eyebrow>
+          <Eyebrow>FUWAMIRO · สำหรับผู้ดูแล</Eyebrow>
           <h1>
-            Our little <em>home.</em>
+            <em>บ้านของเรา</em>
           </h1>
           <p>{user.email}</p>
         </div>
@@ -429,7 +430,7 @@ export function Admin() {
           </button>
         </div>
       </div>
-      <nav className="admin-tabs" aria-label="Admin sections">
+      <nav className="admin-tabs" aria-label="หัวข้อจัดการเว็บไซต์">
         {tabs.map(([id, label]) => (
           <button
             key={id}
@@ -465,7 +466,7 @@ export function Admin() {
                     ).length,
                   ],
                   [
-                    "Alumni",
+                    "สมาชิกที่ย้ายบ้าน",
                     data.cats.filter((c) => c.stage === "alumni").length,
                   ],
                   ["ความทรงจำ", data.events.length],
@@ -478,7 +479,7 @@ export function Admin() {
               </div>
               <div className="admin-welcome">
                 <Heart size={30} />
-                <h2>Every detail, with care.</h2>
+                <h2>ใส่ใจทุกรายละเอียด</h2>
                 <p>
                   จัดการข้อมูลแมวด้วยรหัสเดิมตลอดทุกช่วงชีวิต
                   เลือกเมนูด้านบนเพื่อเพิ่มสมาชิก ครอก หรือความทรงจำใหม่
@@ -522,14 +523,14 @@ export function Admin() {
                   <h3>สมาชิกในบ้าน</h3>
                   <button
                     className="icon-button"
-                    aria-label="Add cat"
+                    aria-label="เพิ่มแมว"
                     onClick={() => setCat(newCat())}
                   >
                     <Plus size={20} />
                   </button>
                 </div>
                 <input
-                  aria-label="Search admin cats"
+                  aria-label="ค้นหาแมวในหลังบ้าน"
                   placeholder="ค้นหาชื่อแมว…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -548,7 +549,7 @@ export function Admin() {
                       <span>
                         <strong>{c.name}</strong>
                         <small>
-                          {c.stage} · {c.availability}
+                          {stageLabel[c.stage]} · {availabilityLabel[c.availability]}
                         </small>
                       </span>
                     </button>
@@ -605,8 +606,8 @@ export function Admin() {
                           })
                         }
                       >
-                        <option>Male</option>
-                        <option>Female</option>
+                        <option value="Male">ผู้</option>
+                        <option value="Female">เมีย</option>
                       </select>
                     </Field>
                     <Field label="สีขน">
@@ -646,10 +647,10 @@ export function Admin() {
                           })
                         }
                       >
-                        <option value="kitten">Kitten</option>
-                        <option value="breeding">Breeding Cat</option>
-                        <option value="retired">Retired</option>
-                        <option value="alumni">Alumni</option>
+                        <option value="kitten">ลูกแมว</option>
+                        <option value="breeding">พ่อพันธุ์/แม่พันธุ์</option>
+                        <option value="retired">วัยเกษียณ</option>
+                        <option value="alumni">ย้ายบ้านแล้ว</option>
                       </select>
                     </Field>
                     <Field label="สถานะ">
@@ -669,7 +670,7 @@ export function Admin() {
                           "Sold",
                           "Staying",
                         ].map((s) => (
-                          <option key={s}>{s}</option>
+                          <option key={s} value={s}>{availabilityLabel[s]}</option>
                         ))}
                       </select>
                     </Field>
@@ -752,7 +753,16 @@ export function Admin() {
                         }
                       />
                     </Field>
-                    <Field label="รายละเอียด Pedigree">
+                    <Field label="ประเภทใบเพ็ด (พิมพ์เอง เช่น SCFC / BCT)">
+                      <input
+                        value={cat.pedigree_type || ""}
+                        placeholder="SCFC / BCT"
+                        onChange={(e) =>
+                          setCat({ ...cat, pedigree_type: e.target.value })
+                        }
+                      />
+                    </Field>
+                    <Field label="รายละเอียดใบเพ็ดเพิ่มเติม">
                       <input
                         value={cat.pedigree}
                         onChange={(e) =>
@@ -769,6 +779,8 @@ export function Admin() {
                         setCat({ ...cat, portrait: v.at(-1) || "" })
                       }
                       onError={setError}
+                      hint="ขนาดแนะนำ 1200 × 1500 พิกเซล (แนวตั้ง 4:5)"
+                      multiple={false}
                     />
                   </fieldset>
                   <fieldset>
@@ -777,6 +789,7 @@ export function Admin() {
                       value={cat.photos}
                       onChange={(v) => setCat({ ...cat, photos: v })}
                       onError={setError}
+                      hint="ขนาดแนะนำ 1600 × 1200 พิกเซล (แนวนอน 4:3)"
                     />
                   </fieldset>
                   <CopyFields
@@ -1089,6 +1102,7 @@ export function Admin() {
                       value={event.photos}
                       onChange={(v) => setEvent({ ...event, photos: v })}
                       onError={setError}
+                      hint="ขนาดแนะนำ 1600 × 1200 พิกเซล (แนวนอน 4:3)"
                     />
                   </fieldset>
                   <Field label="ลิงก์วิดีโอ MP4 / WebM (ไม่บังคับ)">
@@ -1295,7 +1309,17 @@ export function Admin() {
               className="admin-editor content-editor"
               onSubmit={(e) => save(e, () => saveContent(content))}
             >
-              <h2>The words of our home.</h2>
+              <h2>เนื้อหาบนเว็บไซต์</h2>
+              <fieldset>
+                <legend>ไอคอนเว็บไซต์</legend>
+                <MediaEditor
+                  value={content.icon_url ? [content.icon_url] : []}
+                  onChange={(v) => setContent({ ...content, icon_url: v.at(-1) || "" })}
+                  onError={setError}
+                  hint="ขนาดแนะนำ 512 × 512 พิกเซล (สี่เหลี่ยมจัตุรัส) ใช้เป็นโลโก้และไอคอนแท็บ"
+                  multiple={false}
+                />
+              </fieldset>
               <label className="admin-checkbox">
                 <input
                   type="checkbox"

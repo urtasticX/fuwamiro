@@ -23,28 +23,28 @@ export function Health() {
   const care = [
     {
       icon: ShieldCheck,
-      title: "Care, with intention.",
+      title: "ดูแลด้วยความตั้งใจ",
       th: "ใส่ใจสุขภาพอย่างต่อเนื่อง",
       body: "เราให้ความสำคัญกับการติดตามสุขภาพโดยสัตวแพทย์ และจัดเก็บประวัติการดูแลของแมวแต่ละตัวอย่างเป็นระบบ",
       en: "We value ongoing veterinary care and an individual record of each cat’s wellbeing.",
     },
     {
       icon: Sun,
-      title: "Room to be themselves.",
+      title: "พื้นที่ให้เป็นตัวเอง",
       th: "พื้นที่สำหรับการเติบโต",
       body: "พื้นที่สะอาด แสงธรรมชาติ มุมพักผ่อน และของเล่นที่ช่วยให้พวกเขาได้สำรวจโลกในจังหวะของตัวเอง",
       en: "Clean spaces, natural light, quiet corners, and playful moments to explore at their own pace.",
     },
     {
       icon: Heart,
-      title: "A gentle introduction.",
+      title: "คุ้นเคยอย่างอ่อนโยน",
       th: "คุ้นเคยกับความรักในทุกวัน",
       body: "เราใช้เวลาร่วมกับแมวทุกวัน เพื่อให้คุ้นเคยกับผู้คน เสียงในบ้าน และการดูแลอย่างอ่อนโยน",
       en: "Everyday time together helps our cats become comfortable with people, household sounds, and gentle handling.",
     },
     {
       icon: Flower2,
-      title: "A thoughtful next chapter.",
+      title: "ก้าวต่อไปด้วยความใส่ใจ",
       th: "พร้อมสำหรับบ้านใหม่",
       body: "พูดคุยเรื่องไลฟ์สไตล์และความพร้อมของครอบครัว พร้อมส่งต่อข้อมูลการดูแลที่เหมาะกับแมวแต่ละตัว",
       en: "We talk about your home and lifestyle, then share care information that is specific to your companion.",
@@ -54,14 +54,14 @@ export function Health() {
     <>
       <section className="page-hero container">
         <Reveal>
-          <Eyebrow>LOVE IS IN THE LITTLE THINGS</Eyebrow>
+          <Eyebrow>ความรักอยู่ในรายละเอียดเล็ก ๆ</Eyebrow>
           <h1>
-            Growing
+            เติบโต
             <br />
-            with <em>care.</em>
+            ด้วย<em>ความใส่ใจ</em>
           </h1>
           <p className="page-subtitle">
-            A happy life starts with a thoughtful beginning.
+            ชีวิตที่ดีเริ่มต้นจากการดูแลที่ใส่ใจ
           </p>
         </Reveal>
         <span className="page-hero-heart">
@@ -77,11 +77,11 @@ export function Health() {
           />
         </Reveal>
         <Reveal>
-          <Eyebrow>OUR PHILOSOPHY</Eyebrow>
+          <Eyebrow>แนวทางของเรา</Eyebrow>
           <h2>
-            Family.
+            ครอบครัว
             <br />
-            From the <em>first day.</em>
+            ตั้งแต่<em>วันแรก</em>
           </h2>
           <p className="lead">{t(content.health)}</p>
           <p>
@@ -104,11 +104,11 @@ export function Health() {
       </section>
       <section className="container section faq-section">
         <div>
-          <Eyebrow>A FEW THINGS TO KNOW</Eyebrow>
+          <Eyebrow>เรื่องที่ควรรู้</Eyebrow>
           <h2>
-            A little
+            อีกนิดเพื่อ
             <br />
-            <em>peace of mind.</em>
+            <em>ความสบายใจ</em>
           </h2>
         </div>
         <div className="faq-list">
@@ -166,33 +166,33 @@ export function Contact() {
   const [email, setEmail] = useState("");
   const [topic, setTopic] = useState(
     params.get("topic") === "alumni"
-      ? "Alumni update"
+      ? "อัปเดตสมาชิกที่ย้ายบ้าน"
       : cat
-        ? `About ${cat.name}`
-        : "Meet a kitten",
+        ? `สอบถามเกี่ยวกับ ${cat.name}`
+        : "ทำความรู้จักลูกแมว",
   );
   const [message, setMessage] = useState("");
   const [draft, setDraft] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copied, setคัดลอกแล้ว] = useState(false);
   const channels = [
     {
       title: "LINE",
       label:
         locale === "th"
           ? "เริ่มต้นบทสนทนาเล็ก ๆ"
-          : "A little conversation starts here",
+          : "อีกนิดเพื่อ conversation starts here",
       url: content.line_url,
       icon: MessageCircle,
     },
     {
       title: "Instagram",
-      label: "Little moments, every day",
+      label: "เรื่องราวน่ารักในทุกวัน",
       url: content.instagram_url,
       icon: Instagram,
     },
     {
       title: "Facebook",
-      label: "Stories from our little home",
+      label: "เรื่องราวจากบ้านของเรา",
       url: content.facebook_url,
       icon: Facebook,
     },
@@ -200,20 +200,20 @@ export function Contact() {
   async function copy() {
     try {
       await navigator.clipboard.writeText(draft);
-      setCopied(true);
+      setคัดลอกแล้ว(true);
     } catch {
-      setCopied(false);
+      setคัดลอกแล้ว(false);
     }
   }
   return (
     <>
       <section className="page-hero container">
         <Reveal>
-          <Eyebrow>EVERY BEAUTIFUL STORY STARTS WITH HELLO</Eyebrow>
+          <Eyebrow>ทุกเรื่องราวดี ๆ เริ่มจากการทักทาย</Eyebrow>
           <h1>
-            Let’s talk
+            มาพูดคุย
             <br />
-            <em>little paws.</em>
+            <em>เรื่องน้องแมว</em>
           </h1>
           <p>
             {locale === "th"
@@ -228,7 +228,7 @@ export function Contact() {
       <section className="container contact-layout">
         <Reveal>
           <h2>
-            A little <em>hello.</em>
+            <em>ทักทายกัน</em>
           </h2>
           <p>
             {locale === "th"
@@ -262,7 +262,7 @@ export function Contact() {
                         : "Contact details coming soon"}
                     </small>
                   </span>
-                  <span className="coming-soon">Soon</span>
+                  <span className="coming-soon">เร็ว ๆ นี้</span>
                 </div>
               ),
             )}
@@ -287,7 +287,7 @@ export function Contact() {
           </div>
         </Reveal>
         <Reveal className="contact-form-wrap">
-          <Eyebrow>A NOTE TO OUR LITTLE HOME</Eyebrow>
+          <Eyebrow>ส่งข้อความถึงบ้านของเรา</Eyebrow>
           <h3>
             {locale === "th"
               ? "บอกเราเกี่ยวกับคุณ"
@@ -297,9 +297,9 @@ export function Contact() {
             className="contact-form"
             onSubmit={(e) => {
               e.preventDefault();
-              setCopied(false);
+              setคัดลอกแล้ว(false);
               setDraft(
-                `Hello Fuwamiro,\n\nName: ${name}\nEmail: ${email}\nTopic: ${topic}\n\n${message}\n\nWith love,\n${name}`,
+                `สวัสดี Fuwamiro,\n\nชื่อ: ${name}\nEmail: ${email}\nหัวข้อ: ${topic}\n\n${message}\n\nด้วยความรัก,\n${name}`,
               );
             }}
           >
@@ -309,7 +309,7 @@ export function Contact() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Your lovely name"
+                placeholder="ชื่อของคุณ"
                 autoComplete="name"
               />
             </label>
@@ -328,10 +328,10 @@ export function Contact() {
               {locale === "th" ? "อยากคุยเรื่องอะไร" : "What’s on your mind?"}
               <select value={topic} onChange={(e) => setTopic(e.target.value)}>
                 {cat && <option>About {cat.name}</option>}
-                <option>Meet a kitten</option>
-                <option>About our cattery</option>
-                <option>Alumni update</option>
-                <option>Something else</option>
+                <option>ทำความรู้จักลูกแมว</option>
+                <option>เกี่ยวกับบ้านแมวของเรา</option>
+                <option>อัปเดตสมาชิกที่ย้ายบ้าน</option>
+                <option>เรื่องอื่น ๆ</option>
               </select>
             </label>
             <label>
@@ -344,7 +344,7 @@ export function Contact() {
                 placeholder={
                   locale === "th"
                     ? "เล่าให้เราฟังเกี่ยวกับบ้านของคุณ หรือฝากคำถามไว้ได้เลย…"
-                    : "A little about your home, or anything you’d like to ask…"
+                    : "อีกนิดเพื่อ about your home, or anything you’d like to ask…"
                 }
               />
             </label>
@@ -369,12 +369,12 @@ export function Contact() {
                 value={draft}
                 readOnly
                 rows={7}
-                aria-label="Prepared message"
+                aria-label="ข้อความที่เตรียมไว้"
               />
               <div className="draft-actions">
                 <button className="button outline small" onClick={copy}>
                   {copied ? <Check size={15} /> : <Copy size={15} />}{" "}
-                  {copied ? "Copied" : "Copy message"}
+                  {copied ? "คัดลอกแล้ว" : "คัดลอกข้อความ"}
                 </button>
                 {content.line_url && (
                   <a
@@ -383,7 +383,7 @@ export function Contact() {
                     rel="noopener noreferrer"
                     className="button small"
                   >
-                    Open LINE ↗
+                    เปิด LINE ↗
                   </a>
                 )}
                 {content.email && (
@@ -391,7 +391,7 @@ export function Contact() {
                     className="text-link"
                     href={`mailto:${content.email}?subject=${encodeURIComponent(topic)}&body=${encodeURIComponent(draft)}`}
                   >
-                    Open email ↗
+                    เปิดอีเมล ↗
                   </a>
                 )}
               </div>

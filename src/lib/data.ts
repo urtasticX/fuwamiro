@@ -5,7 +5,8 @@ const health = {
 };
 const base = {
   breed: "British Shorthair",
-  pedigree: "Pedigree details available on request",
+  pedigree: "สอบถามรายละเอียดใบเพ็ดเพิ่มเติมได้",
+  pedigree_type: "",
   public_health: health,
 };
 export const sampleCats: Cat[] = [
@@ -222,7 +223,7 @@ export const sampleEvents: JourneyEvent[] = sampleCats.flatMap((cat) => [
     id: `${cat.id}-born`,
     cat_id: cat.id,
     date: cat.birthday,
-    title: { th: "Hello, World!", en: "Hello, World!" },
+    title: { th: "วันแรกที่ได้พบกัน", en: "Hello, World!" },
     description: {
       th: "วันแรกของเรื่องราวเล็ก ๆ ที่เต็มไปด้วยความรัก",
       en: "The first page of a little story, already filled with love.",
@@ -244,7 +245,7 @@ export const sampleEvents: JourneyEvent[] = sampleCats.flatMap((cat) => [
           : cat.stage === "alumni"
             ? "2026-01-10"
             : `${Number(cat.birthday.slice(0, 4))}-09-01`,
-    title: { th: "A Place to Belong", en: "A Place to Belong" },
+    title: { th: "บ้านที่อบอุ่น", en: "A Place to Belong" },
     description: {
       th: "เริ่มคุ้นเคยกับเสียงของบ้าน มุมโปรด และอ้อมกอดอุ่น ๆ",
       en: "Getting to know the sounds of home, favourite corners, and warm cuddles.",
@@ -263,7 +264,7 @@ export const sampleEvents: JourneyEvent[] = sampleCats.flatMap((cat) => [
             ? "2026-03-01"
             : `${Number(cat.birthday.slice(0, 4)) + 1}-01-10`,
     title: {
-      th: cat.stage === "alumni" ? "My Forever Home" : "Growing Up",
+      th: cat.stage === "alumni" ? "บ้านใหม่ของฉัน" : "เติบโตขึ้นอีกนิด",
       en: cat.stage === "alumni" ? "My Forever Home" : "Growing Up",
     },
     description: {
@@ -284,7 +285,7 @@ export const sampleEvents: JourneyEvent[] = sampleCats.flatMap((cat) => [
           id: "moon-dad",
           cat_id: "moon",
           date: "2026-07-15",
-          title: { th: "Becoming a Dad", en: "Becoming a Dad" },
+          title: { th: "ได้เป็นคุณพ่อ", en: "Becoming a Dad" },
           description: {
             th: "ต้อนรับสมาชิกตัวน้อยของครอก Little Clouds เข้าสู่ครอบครัว",
             en: "Welcoming our Little Clouds litter into the family.",
@@ -296,6 +297,7 @@ export const sampleEvents: JourneyEvent[] = sampleCats.flatMap((cat) => [
 ]);
 export const defaultContent: SiteContent = {
   sample_mode: true,
+  icon_url: "",
   intro: {
     th: "บ้านเล็ก ๆ ที่เต็มไปด้วยความรัก เราเชื่อว่าความผูกพันที่สวยงาม เริ่มต้นจากการดูแลที่อ่อนโยน และเวลาที่ได้ใช้ร่วมกัน",
     en: "A little home filled with love. We believe the most beautiful bonds begin with gentle care and the time we share together.",

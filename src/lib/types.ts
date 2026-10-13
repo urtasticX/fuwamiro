@@ -20,6 +20,7 @@ export type Cat = {
   story: Copy;
   public_health: Copy;
   pedigree: string;
+  pedigree_type?: string;
   father_id?: string | null;
   mother_id?: string | null;
   litter_id?: string | null;
@@ -45,6 +46,7 @@ export type Litter = {
 };
 export type SiteContent = {
   sample_mode?: boolean;
+  icon_url?: string;
   intro: Copy;
   philosophy: Copy;
   health: Copy;

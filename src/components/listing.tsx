@@ -19,38 +19,38 @@ export function Listing({
   const titles = {
     family: (
       <>
-        Meet our <em>family.</em>
+        รู้จัก<em>ครอบครัวของเรา</em>
       </>
     ),
     kings: (
       <>
-        Our gentle <em>kings.</em>
+        <em>พ่อพันธุ์ของเรา</em>
       </>
     ),
     queens: (
       <>
-        Our lovely <em>queens.</em>
+        <em>แม่พันธุ์ของเรา</em>
       </>
     ),
     kittens: (
       <>
-        Little paws.
+        อุ้งเท้าเล็ก ๆ
         <br />
-        Beautiful <em>beginnings.</em>
+        จุดเริ่มต้น<em>ที่งดงาม</em>
       </>
     ),
     alumni: (
       <>
-        Forever <em>loved.</em>
+        <em>รักเสมอ</em>
       </>
     ),
   };
   const descriptions = {
-    family: "Every little paw has a beautiful story.",
-    kings: "The gentle hearts of our home.",
-    queens: "A little grace. A whole lot of love.",
-    kittens: "Your next chapter might begin with a little purr.",
-    alumni: "Little paws, beautiful new beginnings.",
+    family: "ทุกตัวมีเรื่องราวน่ารัก ๆ ให้รู้จัก",
+    kings: "หัวใจแสนอ่อนโยนของบ้านเรา",
+    queens: "ความอ่อนหวานและความรักในทุกวัน",
+    kittens: "เพื่อนตัวน้อยอาจกำลังรอคุณอยู่",
+    alumni: "เรื่องราวอบอุ่นจากบ้านใหม่",
   };
   const filters = kitten
     ? ["All", "Available", "Reserved", "Under Evaluation", "Sold", "Staying"]
@@ -59,6 +59,7 @@ export function Listing({
       : alumni
         ? []
         : ["All", "Active", "Retired"];
+  const filterLabels: Record<string, string> = { All: "ทั้งหมด", Available: "พร้อมย้ายบ้าน", Reserved: "มีคนจองแล้ว", "Under Evaluation": "กำลังประเมิน", Sold: "ย้ายบ้านแล้ว", Staying: "อยู่กับเรา", Kings: "พ่อพันธุ์", Queens: "แม่พันธุ์", Retired: "วัยเกษียณ", Active: "อยู่กับเรา" };
   const litter = litters.find((l) => l.id === params.get("litter"));
   let visible = cats
     .filter((c) =>
@@ -99,10 +100,10 @@ export function Listing({
         <Reveal>
           <Eyebrow>
             {kitten
-              ? "A LITTLE LOVE IS WAITING"
+              ? "ความรักเล็ก ๆ กำลังรอคุณ"
               : alumni
-                ? "ALWAYS PART OF OUR FAMILY"
-                : "THE HEART OF FUWAMIRO"}
+                ? "เป็นครอบครัวของเราเสมอ"
+                : "หัวใจของ Fuwamiro"}
           </Eyebrow>
           <h1>{titles[kind]}</h1>
           <p className="page-subtitle">{descriptions[kind]}</p>
@@ -123,7 +124,7 @@ export function Listing({
       <section className="container listing-section">
         {!alumni && (
           <div className="filter-bar">
-            <div className="filter-tabs" role="group" aria-label="Filter cats">
+            <div className="filter-tabs" role="group" aria-label="กรองรายชื่อแมว">
               {filters.map((f) => (
                 <button
                   key={f}
@@ -132,7 +133,7 @@ export function Listing({
                   }
                   onClick={() => setFilter(f)}
                 >
-                  {f}
+                  {filterLabels[f] || f}
                   {f === "All" && (
                     <span>
                       {
@@ -159,7 +160,7 @@ export function Listing({
             <label className="search-field">
               <Search size={16} />
               <input
-                aria-label="Search cats"
+                aria-label="ค้นหาแมว"
                 placeholder={
                   locale === "th"
                     ? "ค้นหาชื่อหรือสีขน"
@@ -174,7 +175,7 @@ export function Listing({
         {litter && (
           <div className="litter-heading">
             <span>{litter.name}</span>
-            <Link href="/kittens">View all litters ↗</Link>
+            <Link href="/kittens">ดูลูกแมวทั้งหมด ↗</Link>
           </div>
         )}
         {visible.length === 0 ? (
@@ -197,7 +198,7 @@ export function Listing({
                 setSearch("");
               }}
             >
-              Reset filters
+              ล้างตัวกรอง
             </button>
           </div>
         ) : alumni ? (
@@ -208,18 +209,18 @@ export function Listing({
                   href={`/profile?id=${c.id}`}
                   className="alumni-story-photo"
                 >
-                  <CatPhoto src={c.portrait} alt={`${c.name}, forever loved`} />
-                  <span className="card-label">A NEW CHAPTER</span>
+                  <CatPhoto src={c.portrait} alt={`${c.name} ในบ้านใหม่`} />
+                  <span className="card-label">บทใหม่ของชีวิต</span>
                 </Link>
                 <div>
-                  <Eyebrow>FROM OUR HOME TO THEIRS</Eyebrow>
+                  <Eyebrow>จากบ้านเรา สู่บ้านของเขา</Eyebrow>
                   <h2>
                     {c.name}
-                    {c.nickname && <small>now {c.nickname} ♡</small>}
+                    {c.nickname && <small>ชื่อใหม่ {c.nickname} ♡</small>}
                   </h2>
                   <p>{c.story[locale]}</p>
                   <Link href={`/profile?id=${c.id}`} className="text-link">
-                    Follow the little story <ArrowUpRight size={18} />
+                    อ่านเรื่องราวของน้อง <ArrowUpRight size={18} />
                   </Link>
                 </div>
               </Reveal>
@@ -235,14 +236,14 @@ export function Listing({
         {alumni && (
           <div className="alumni-update">
             <Heart size={25} />
-            <h3>Still growing. Still connected.</h3>
+            <h3>เติบโตต่อไปในความรัก</h3>
             <p>
               {locale === "th"
                 ? "เป็นครอบครัวของน้องจาก Fuwamiro? ส่งภาพและเรื่องราวมาให้เราเพิ่มในสมุดความทรงจำของน้องได้เสมอ"
                 : "Part of a Fuwamiro forever family? Share a photo or a little update for your companion’s memory book."}
             </p>
             <Link href="/contact?topic=alumni" className="button outline">
-              Share a little update <ArrowUpRight size={16} />
+              แบ่งปันเรื่องราว <ArrowUpRight size={16} />
             </Link>
           </div>
         )}

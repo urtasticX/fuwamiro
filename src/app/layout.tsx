@@ -4,11 +4,11 @@ import { Navbar, Footer } from "@/components/shell";
 import "./globals.css";
 export const metadata: Metadata = {
   title: {
-    default: "Fuwamiro — Raised with Love, Growing with Care",
+    default: "Fuwamiro — บ้านแมวที่เต็มไปด้วยความรัก",
     template: "%s · Fuwamiro",
   },
   description:
-    "A little home, a lot of love. Meet the Fuwamiro British Shorthair family, discover their stories, and find your little companion.",
+    "ทำความรู้จักครอบครัวแมว Fuwamiro เรื่องราวของพวกเขา และเพื่อนตัวน้อยที่อาจรอคุณอยู่",
 };
 export default function RootLayout({
   children,
@@ -20,7 +20,7 @@ export default function RootLayout({
       <body>
         <Providers>
           <a className="skip-link" href="#main">
-            Skip to content
+            ข้ามไปยังเนื้อหา
           </a>
           <Navbar />
           <main id="main">{children}</main>

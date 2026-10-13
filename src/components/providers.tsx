@@ -47,14 +47,9 @@ export function Providers({ children }: { children: ReactNode }) {
     "loading" | "connected" | "error"
   >("loading");
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  useEffect(() => {
-    const saved = localStorage.getItem("fuwamiro-language");
-    if (saved === "en" || saved === "th") setLocaleState(saved);
-  }, []);
   function setLocale(l: Locale) {
-    setLocaleState(l);
-    localStorage.setItem("fuwamiro-language", l);
-    document.documentElement.lang = l;
+    setLocaleState("th");
+    document.documentElement.lang = "th";
   }
   async function refresh() {
     setConnectionStatus("loading");
@@ -81,12 +76,22 @@ export function Providers({ children }: { children: ReactNode }) {
     void refresh();
     void initializeAnalytics();
   }, []);
+  useEffect(() => {
+    if (!content.icon_url) return;
+    let icon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+    if (!icon) {
+      icon = document.createElement("link");
+      icon.rel = "icon";
+      document.head.appendChild(icon);
+    }
+    icon.href = content.icon_url;
+  }, [content.icon_url]);
   return (
     <C.Provider
       value={{
         locale,
         setLocale,
-        t: (c) => c[locale] || c.en,
+        t: (c) => c.th || c.en,
         cats,
         events,
         litters,

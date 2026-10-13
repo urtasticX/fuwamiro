@@ -22,9 +22,9 @@ export function Profile() {
   if (!cat)
     return (
       <div className="container empty-state">
-        <h1>A little face we couldn’t find.</h1>
+        <h1>ไม่พบข้อมูลแมวตัวนี้</h1>
         <Link href="/family" className="button">
-          Meet our family <ArrowUpRight size={16} />
+          พบสมาชิกของเรา <ArrowUpRight size={16} />
         </Link>
       </div>
     );
@@ -44,12 +44,12 @@ export function Profile() {
             kitten ? "/kittens" : cat.stage === "alumni" ? "/alumni" : "/family"
           }
         >
-          <ArrowLeft size={15} /> Back to{" "}
+          <ArrowLeft size={15} /> กลับไปยัง{" "}
           {kitten
-            ? "our kittens"
+            ? "ลูกแมว"
             : cat.stage === "alumni"
-              ? "our alumni"
-              : "our family"}
+              ? "สมาชิกที่ย้ายบ้าน"
+              : "ครอบครัวของเรา"}
         </Link>
         <div className="profile-hero-grid">
           <Reveal className="profile-portrait">
@@ -60,102 +60,103 @@ export function Profile() {
               sizes="(max-width: 700px) 100vw, 50vw"
             />
             <span className="portrait-caption">
-              A LITTLE PORTRAIT OF {cat.name.toUpperCase()}
+              ภาพของ {cat.name}
             </span>
           </Reveal>
           <Reveal className="profile-intro">
             <Eyebrow>
               {kitten
-                ? "OUR LITTLE ONE"
+                ? "สมาชิกตัวน้อยของเรา"
                 : cat.stage === "alumni"
-                  ? "FOREVER PART OF OUR FAMILY"
+                  ? "เป็นครอบครัวของเราเสมอ"
                   : cat.stage === "retired"
-                    ? "RETIRED & ENDLESSLY LOVED"
+                    ? "สมาชิกวัยเกษียณที่เรารัก"
                     : cat.gender === "Male"
-                      ? "MEET OUR KING"
-                      : "MEET OUR QUEEN"}
+                      ? "รู้จักพ่อพันธุ์"
+                      : "รู้จักแม่พันธุ์"}
             </Eyebrow>
             <h1>
-              Hello, I’m
+              สวัสดี ฉันชื่อ
               <br />
               <em>{cat.name}.</em>
             </h1>
             {cat.nickname && (
               <p className="new-name">
-                Now called {cat.nickname} by my forever family ♡
+                ครอบครัวใหม่เรียกฉันว่า {cat.nickname} ♡
               </p>
             )}
             <p className="profile-personality">{t(cat.personality)}</p>
             {kitten && <StatusBadge status={cat.availability} />}
             <dl className="profile-facts">
               <div>
-                <dt>BREED</dt>
+                <dt>สายพันธุ์</dt>
                 <dd>{cat.breed}</dd>
               </div>
               <div>
-                <dt>GENDER</dt>
+                <dt>เพศ</dt>
                 <dd>
-                  {cat.gender} {cat.gender === "Male" ? "♂" : "♀"}
+                  {cat.gender === "Male" ? "ผู้ ♂" : "เมีย ♀"}
                 </dd>
               </div>
               <div>
-                <dt>COAT COLOUR</dt>
+                <dt>สีขน</dt>
                 <dd>
                   {cat.color} · {cat.color_code}
                 </dd>
               </div>
               <div>
-                <dt>BIRTHDAY</dt>
+                <dt>วันเกิด</dt>
                 <dd>{formatDate(cat.birthday, locale)}</dd>
               </div>
               {cat.ready_date && (
                 <div>
-                  <dt>READY FOR HOME</dt>
+                  <dt>พร้อมย้ายบ้าน</dt>
                   <dd>{formatDate(cat.ready_date, locale)}</dd>
                 </div>
               )}
               {cat.adoption_date && (
                 <div>
-                  <dt>FOREVER HOME SINCE</dt>
+                  <dt>ย้ายบ้านเมื่อ</dt>
                   <dd>{formatDate(cat.adoption_date, locale)}</dd>
                 </div>
               )}
               {cat.price != null && (
                 <div>
-                  <dt>ADOPTION FEE</dt>
+                  <dt>ราคา</dt>
                   <dd>฿{cat.price.toLocaleString()}</dd>
                 </div>
               )}
             </dl>
-            <p className="pedigree">{cat.pedigree}</p>
+            {cat.pedigree_type && <p className="pedigree">ประเภทใบเพ็ด: {cat.pedigree_type}</p>}
+            {cat.pedigree && <p className="pedigree">รายละเอียดใบเพ็ด: {cat.pedigree}</p>}
             {kitten ? (
               <Link
                 className="button"
                 href={content.line_url || `/contact?cat=${cat.id}`}
               >
-                Ask about {cat.name} on LINE <ArrowUpRight size={17} />
+                สอบถามเกี่ยวกับ {cat.name} <ArrowUpRight size={17} />
               </Link>
             ) : (
               <a className="text-link" href="#journey">
-                Follow my little journey <ArrowUpRight size={17} />
+                ติดตามเรื่องราวของฉัน <ArrowUpRight size={17} />
               </a>
             )}
           </Reveal>
         </div>
       </section>
-      <nav className="profile-tabs" aria-label="Profile sections">
-        <a href="#about-me">About me</a>
-        <a href="#journey">My journey</a>
-        <a href="#my-family">My family</a>
-        <a href="#little-moments">Little moments</a>
+      <nav className="profile-tabs" aria-label="หัวข้อประวัติแมว">
+        <a href="#about-me">เกี่ยวกับฉัน</a>
+        <a href="#journey">การเติบโต</a>
+        <a href="#my-family">ครอบครัว</a>
+        <a href="#little-moments">ภาพความทรงจำ</a>
       </nav>
       <section id="about-me" className="container section about-profile">
         <Reveal>
-          <Eyebrow>A LITTLE MORE ABOUT ME</Eyebrow>
+          <Eyebrow>ทำความรู้จักกันอีกนิด</Eyebrow>
           <h2>
-            Small things.
+            เรื่องเล็ก ๆ
             <br />
-            <em>Big personality.</em>
+            <em>ตัวตนที่น่ารัก</em>
           </h2>
         </Reveal>
         <Reveal>
@@ -163,10 +164,10 @@ export function Profile() {
           <div className="health-note">
             <ShieldCheck size={23} />
             <div>
-              <h4>Growing with care</h4>
+              <h4>เติบโตด้วยความใส่ใจ</h4>
               <p>{t(cat.public_health)}</p>
               <Link href="/health" className="text-link">
-                Our approach to care <ArrowUpRight size={14} />
+                แนวทางการดูแล <ArrowUpRight size={14} />
               </Link>
             </div>
           </div>
@@ -174,9 +175,9 @@ export function Profile() {
       </section>
       <section id="journey" className="container section journey-section">
         <Reveal className="center-heading">
-          <Eyebrow>EVERY LITTLE MOMENT MATTERS</Eyebrow>
+          <Eyebrow>ทุกช่วงเวลามีความหมาย</Eyebrow>
           <h2>
-            My <em>journey.</em>
+            การ<em>เติบโตของฉัน</em>
           </h2>
           <p>
             {locale === "th"
@@ -192,9 +193,9 @@ export function Profile() {
       <section id="my-family" className="family-tree-section section">
         <div className="container">
           <Reveal className="center-heading">
-            <Eyebrow>CONNECTED BY A LITTLE LOVE</Eyebrow>
+            <Eyebrow>สายใยแห่งความรัก</Eyebrow>
             <h2>
-              My <em>family.</em>
+              <em>ครอบครัวของฉัน</em>
             </h2>
             <p>
               {locale === "th"
@@ -207,10 +208,10 @@ export function Profile() {
       </section>
       <section id="little-moments" className="container section">
         <SectionHeading
-          eyebrow="THE EVERYDAY KIND OF BEAUTIFUL"
+          eyebrow="ความทรงจำแสนพิเศษ"
           title={
             <>
-              Little <em>moments.</em>
+              <em>ภาพความทรงจำ</em>
             </>
           }
           description={
@@ -223,7 +224,7 @@ export function Profile() {
       </section>
       <div className="profile-end">
         <Heart size={20} />
-        <p>Every little paw has a story to tell.</p>
+        <p>ทุกอุ้งเท้าเล็ก ๆ มีเรื่องราวของตัวเอง</p>
       </div>
       <ContactCTA />
     </>

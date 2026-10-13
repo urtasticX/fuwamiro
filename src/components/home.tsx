@@ -40,21 +40,21 @@ export function Home() {
       <section className="hero container" ref={hero}>
         <div className="hero-copy">
           <Reveal>
-            <Eyebrow>A LITTLE HOME, A LOT OF LOVE</Eyebrow>
+            <Eyebrow>บ้านเล็ก ๆ ที่เต็มไปด้วยความรัก</Eyebrow>
           </Reveal>
           <motion.h1
             initial={reduce ? false : { opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.12 }}
           >
-            Raised with <em>Love,</em>
+            เติบโตด้วย<em>ความรัก</em>
             <br />
-            Growing
-            <br /> with Care<span className="title-dot">.</span>
+            ดูแล
+            <br /> ด้วยความใส่ใจ<span className="title-dot">.</span>
           </motion.h1>
           <Reveal delay={0.22}>
             <p className="hero-subtitle">
-              Every little paw has a story to tell.
+              ทุกอุ้งเท้าเล็ก ๆ มีเรื่องราวของตัวเอง
             </p>
             <p className="hero-thai">
               {locale === "th"
@@ -63,10 +63,10 @@ export function Home() {
             </p>
             <div className="hero-buttons">
               <Link href="/family" className="button">
-                Meet Our Family <ArrowUpRight size={17} />
+                รู้จักครอบครัวของเรา <ArrowUpRight size={17} />
               </Link>
               <Link href="/kittens" className="button outline">
-                Available Kittens
+                ลูกแมวหาบ้าน
               </Link>
             </div>
           </Reveal>
@@ -91,8 +91,8 @@ export function Home() {
               </div>
             </div>
             <div>
-              <span>Small paws. Big love.</span>
-              <small>Our family, from the very beginning.</small>
+              <span>อุ้งเท้าเล็ก ๆ ความรักยิ่งใหญ่</span>
+              <small>ครอบครัวของเรา ตั้งแต่วันแรก</small>
             </div>
             <Heart size={15} />
           </Reveal>
@@ -110,12 +110,12 @@ export function Home() {
               sizes="(max-width: 700px) 100vw, 52vw"
             />
           </motion.div>
-          <span className="hero-image-label">MOMENTS AT HOME — 01</span>
+          <span className="hero-image-label">ช่วงเวลาที่บ้าน — 01</span>
           <div className="hero-sticker">
             <Heart size={20} strokeWidth={1.2} />
             <span>
-              Made of fluff
-              <br />& a little love.
+              ความนุ่มฟู
+              <br />และความรัก
             </span>
           </div>
           <Link
@@ -123,38 +123,38 @@ export function Home() {
             className="hero-caption"
           >
             <div>
-              <span>MEET OUR GENTLE SOUL</span>
+              <span>รู้จักสมาชิกของเรา</span>
               <strong>
-                {featured?.name || "Our little home"}{" "}
-                <small>{featured?.breed || "With love, always"}</small>
+                {featured?.name || "บ้านของเรา"}{" "}
+                <small>{featured?.breed || "ด้วยความรักเสมอ"}</small>
               </strong>
             </div>
             <ArrowUpRight size={21} />
           </Link>
         </div>
         <a className="scroll-cue" href="#our-story">
-          <span>SCROLL TO OUR LITTLE WORLD</span>
+          <span>เลื่อนดูโลกใบเล็กของเรา</span>
           <ArrowDown size={14} />
         </a>
       </section>
       <div className="values-strip">
         <span>
           <Heart />
-          Raised as family
+          เลี้ยงดูเหมือนครอบครัว
         </span>
         <i />
         <span>
           <ShieldCheck />
-          Thoughtful care
+          ดูแลด้วยความใส่ใจ
         </span>
         <i />
         <span>
           <Flower2 />
-          Gentle beginnings
+          เริ่มต้นอย่างอ่อนโยน
         </span>
         <i />
         <span>
-          <Sun />A lifetime of love
+          <Sun />รักตลอดไป
         </span>
       </div>
       <section id="our-story" className="container section story-section">
@@ -171,22 +171,22 @@ export function Home() {
               alt="Our little kittens growing together"
             />
           </div>
-          <span className="handwritten">a home, before a forever home.</span>
+          <span className="handwritten">บ้านแห่งแรก ก่อนพบครอบครัวใหม่</span>
         </Reveal>
         <Reveal className="story-copy">
-          <Eyebrow>WELCOME TO FUWAMIRO</Eyebrow>
+          <Eyebrow>ยินดีต้อนรับสู่ Fuwamiro</Eyebrow>
           <h2>
-            A little home.
-            <br />A whole lot of <em>heart.</em>
+            บ้านเล็ก ๆ
+            <br />ที่เต็มไปด้วย<em>หัวใจ</em>
           </h2>
           <p className="lead">{t(content.intro)}</p>
           <p>{t(content.philosophy)}</p>
           <Link href="/health" className="text-link">
-            Our story & the care behind it <ArrowUpRight size={18} />
+            เรื่องราวและการดูแลของเรา <ArrowUpRight size={18} />
           </Link>
           <div className="story-signature">
-            <span>with love,</span>
-            <strong>the Fuwamiro family ♡</strong>
+            <span>ด้วยรัก</span>
+            <strong>ครอบครัว Fuwamiro ♡</strong>
           </div>
         </Reveal>
       </section>
@@ -194,10 +194,10 @@ export function Home() {
         <div className="container">
           <Reveal>
             <SectionHeading
-              eyebrow="THE HEART OF OUR HOME"
+              eyebrow="หัวใจของบ้านเรา"
               title={
                 <>
-                  Meet our <em>family.</em>
+                  รู้จัก<em>ครอบครัวของเรา</em>
                 </>
               }
               description={
@@ -206,7 +206,7 @@ export function Home() {
                   : "Different personalities. Equally loved. A little story behind every face."
               }
               href="/family"
-              linkLabel="Meet everyone"
+              linkLabel="รู้จักทุกตัว"
             />
           </Reveal>
           <div className="cat-grid">
@@ -222,10 +222,10 @@ export function Home() {
       <section className="container section">
         <Reveal>
           <SectionHeading
-            eyebrow="LITTLE PAWS, NEW BEGINNINGS"
+            eyebrow="อุ้งเท้าเล็ก ๆ กับการเริ่มต้นใหม่"
             title={
               <>
-                A little love, <em>waiting.</em>
+                ความรักเล็ก ๆ <em>กำลังรอคุณ</em>
               </>
             }
             description={
@@ -234,7 +234,7 @@ export function Home() {
                 : "Meet our little ones, growing with care and ready for their next chapter."
             }
             href="/kittens"
-            linkLabel="All kittens"
+            linkLabel="ดูลูกแมวทั้งหมด"
           />
         </Reveal>
         <div className="cat-grid">
@@ -255,11 +255,11 @@ export function Home() {
       <section className="alumni-feature">
         <div className="container alumni-layout">
           <Reveal className="alumni-copy">
-            <Eyebrow>ALWAYS PART OF OUR FAMILY</Eyebrow>
+            <Eyebrow>เป็นครอบครัวของเราเสมอ</Eyebrow>
             <h2>
-              New homes.
+              บ้านใหม่
               <br />
-              Same <em>little hearts.</em>
+              หัวใจดวงเดิม<em>ที่เรารัก</em>
             </h2>
             <p>
               {locale === "th"
@@ -267,7 +267,7 @@ export function Home() {
                 : "A new home is never the end of their story. Follow the little lives that will always be part of our family."}
             </p>
             <Link href="/alumni" className="text-link">
-              Stories from their forever homes <ArrowUpRight size={18} />
+              เรื่องราวจากบ้านใหม่ <ArrowUpRight size={18} />
             </Link>
           </Reveal>
           <Reveal className="alumni-photos">
@@ -287,8 +287,8 @@ export function Home() {
               </div>
               <span>
                 {alumni
-                  ? `${alumni.name}${alumni.nickname ? `, now ${alumni.nickname}` : ""} ♡`
-                  : "a little love, forever. ♡"}
+                  ? `${alumni.name}${alumni.nickname ? ` ชื่อใหม่ ${alumni.nickname}` : ""} ♡`
+                  : "รักเสมอ ♡"}
               </span>
             </Link>
             <div className="alumni-polaroid small">
@@ -298,7 +298,7 @@ export function Home() {
                   alt="A little portrait from home"
                 />
               </div>
-              <span>forever loved.</span>
+              <span>รักตลอดไป</span>
             </div>
           </Reveal>
         </div>

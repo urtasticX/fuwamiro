@@ -72,7 +72,7 @@ export function SectionHeading({
   title,
   description,
   href,
-  linkLabel = "Explore more",
+  linkLabel = "ดูเพิ่มเติม",
 }: {
   eyebrow: string;
   title: ReactNode;
@@ -97,10 +97,11 @@ export function SectionHeading({
   );
 }
 export function StatusBadge({ status }: { status: string }) {
+  const labels: Record<string, string> = { Available: "พร้อมย้ายบ้าน", Reserved: "มีคนจองแล้ว", "Under Evaluation": "กำลังประเมิน", Sold: "ย้ายบ้านแล้ว", Staying: "อยู่กับเรา" };
   return (
     <span className={`status ${status.toLowerCase().replaceAll(" ", "-")}`}>
       <i />
-      {status}
+      {labels[status] || status}
     </span>
   );
 }
@@ -120,12 +121,12 @@ export function CatCard({ cat, index = 0 }: { cat: Cat; index?: number }) {
           ) : (
             <span className="card-label">
               {cat.stage === "retired"
-                ? "Retired & loved"
+                ? "สมาชิกวัยเกษียณ"
                 : cat.stage === "alumni"
-                  ? "Forever loved"
+                  ? "ย้ายบ้านแล้ว"
                   : cat.gender === "Male"
-                    ? "OUR KING"
-                    : "OUR QUEEN"}
+                    ? "พ่อพันธุ์"
+                    : "แม่พันธุ์"}
             </span>
           )}
           <span className="card-arrow">
@@ -143,13 +144,13 @@ export function CatCard({ cat, index = 0 }: { cat: Cat; index?: number }) {
             </p>
             {kitten && (
               <small>
-                {locale === "th" ? "เกิด" : "Born"}{" "}
+                เกิด{" "}
                 {formatDate(cat.birthday, locale)}
               </small>
             )}
           </div>
           <span className="profile-link">
-            {locale === "th" ? "รู้จักน้อง" : "View profile"}
+            รู้จักน้อง
             <ArrowRight size={14} />
           </span>
         </div>
@@ -165,11 +166,11 @@ export function ContactCTA() {
         <div className="cta-doodle">
           <Heart size={42} strokeWidth={0.8} />
         </div>
-        <Eyebrow>LET’S BEGIN A LITTLE STORY</Eyebrow>
+        <Eyebrow>เริ่มต้นเรื่องราวดี ๆ ด้วยกัน</Eyebrow>
         <h2>
-          Your little companion
+          เพื่อนตัวน้อยของคุณ
           <br />
-          might be waiting <em>here.</em>
+          อาจรออยู่<em>ที่นี่</em>
         </h2>
         <p>
           {locale === "th"
@@ -177,16 +178,16 @@ export function ContactCTA() {
             : "Curious about our little family? We’re always happy to say hello."}
         </p>
         <Link className="button" href="/contact">
-          Say hello to us <ArrowUpRight size={17} />
+          ทักทายเรา <ArrowUpRight size={17} />
         </Link>
         <span className="cta-foot">
-          A thoughtful match. A beautiful beginning.
+          พบกันด้วยความใส่ใจ เริ่มต้นด้วยความรัก
         </span>
       </Reveal>
     </section>
   );
 }
-export function formatDate(date: string, locale = "en") {
+export function formatDate(date: string, locale = "th") {
   return new Date(`${date}T12:00:00`).toLocaleDateString(
     locale === "th" ? "th-TH" : "en-GB",
     { day: "numeric", month: "short", year: "numeric" },
@@ -227,7 +228,7 @@ export function PhotoGallery({
             key={`${photo}-${i}`}
             onClick={() => open(i)}
             className="gallery-photo"
-            aria-label={`Open photo ${i + 1} of ${name}`}
+            aria-label={`เปิดรูปที่ ${i + 1} ของ ${name}`}
           >
             <CatPhoto src={photo} alt={`${name} — memory ${i + 1}`} />
             <span>
@@ -255,7 +256,7 @@ export function PhotoGallery({
         <button
           ref={close}
           className="lightbox-close icon-button"
-          aria-label="Close photo viewer"
+          aria-label="ปิดรูปภาพ"
           onClick={dismiss}
         >
           <X />
@@ -276,7 +277,7 @@ export function PhotoGallery({
                 onClick={() =>
                   setSelected((selected - 1 + photos.length) % photos.length)
                 }
-                aria-label="Previous photo"
+                aria-label="รูปก่อนหน้า"
               >
                 <ChevronLeft />
               </button>
@@ -286,7 +287,7 @@ export function PhotoGallery({
               <button
                 className="icon-button"
                 onClick={() => setSelected((selected + 1) % photos.length)}
-                aria-label="Next photo"
+                aria-label="รูปถัดไป"
               >
                 <ChevronRight />
               </button>
