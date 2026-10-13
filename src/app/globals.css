@@ -825,7 +825,7 @@ html[lang="th"] .story-copy > p {
 }
 .alumni-photos {
   position: relative;
-  height: 380px;
+  height: 480px;
   padding-left: 30px;
 }
 .alumni-polaroid {
@@ -837,7 +837,7 @@ html[lang="th"] .story-copy > p {
   box-shadow: 0 8px 30px #34495e0b;
 }
 .alumni-polaroid > div {
-  height: 285px;
+  aspect-ratio: 3 / 4;
   position: relative;
   overflow: hidden;
 }
@@ -856,9 +856,6 @@ html[lang="th"] .story-copy > p {
   bottom: 0;
   width: 207px;
   transform: rotate(8deg);
-}
-.alumni-polaroid.small > div {
-  height: 195px;
 }
 .contact-cta {
   padding-block: 100px;
@@ -1955,9 +1952,6 @@ label select:focus {
   .alumni-polaroid.small {
     width: 180px;
   }
-  .alumni-polaroid.small > div {
-    height: 180px;
-  }
   .profile-hero-grid,
   .about-profile,
   .care-intro {
@@ -2050,17 +2044,11 @@ label select:focus {
   .alumni-polaroid {
     width: 225px;
   }
-  .alumni-polaroid > div {
-    height: 245px;
-  }
   .alumni-polaroid.small {
     width: 155px;
   }
-  .alumni-polaroid.small > div {
-    height: 155px;
-  }
   .alumni-photos {
-    height: 340px;
+    height: 400px;
   }
   .cta-doodle {
     right: 30px;
@@ -2419,7 +2407,7 @@ label select:focus {
     max-width: none;
   }
   .alumni-photos {
-    height: 370px;
+    height: 435px;
     padding-left: 15px;
     max-width: 430px;
     width: 100%;
@@ -2428,15 +2416,9 @@ label select:focus {
   .alumni-polaroid {
     width: 255px;
   }
-  .alumni-polaroid > div {
-    height: 270px;
-  }
   .alumni-polaroid.small {
     width: 177px;
     right: 7px;
-  }
-  .alumni-polaroid.small > div {
-    height: 177px;
   }
   .contact-cta {
     padding-block: 65px;
@@ -2788,9 +2770,6 @@ label select:focus {
   }
   .alumni-polaroid.small {
     width: 150px;
-  }
-  .alumni-polaroid.small > div {
-    height: 150px;
   }
   .profile-tabs {
     font-size: 9px;
